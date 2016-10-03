@@ -4,8 +4,6 @@
  *  Created on: 1 oct. 2016
  *      Author: Jorge
  */
-using namespace std;
-#include <iostream>
 
 class Vector {
 	public:
@@ -20,6 +18,7 @@ class Vector {
 		void prodVectorial(Vector,Vector);
 		float prodEscalar(Vector);
 		float getValPos(int);
+		void setValPos(float,int);
 		int getLon();
 	private:
 		int lon;

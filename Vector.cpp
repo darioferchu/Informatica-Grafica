@@ -20,6 +20,10 @@
 			return vector[posicion];
 	}
 
+	void Vector::setValPos(float val, int posicion) {
+				vector[posicion] = val;
+	}
+
 	int Vector::getLon() {
 		return lon;
 	}
