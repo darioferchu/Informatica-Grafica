@@ -1,7 +1,8 @@
 /*
  * Matriz.h
  */
-
+using namespace std;
+#include <iostream>
 #include "Vector.h"
 
 class Matriz {

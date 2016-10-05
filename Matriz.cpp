@@ -78,13 +78,37 @@ void Matriz::mult(Matriz m1, Matriz m2) {
 
 void Matriz::trasponer() {
 
-	for(int i = 0; i<numVect; i++) {
+	/*for(int i = 0; i<numVect; i++) {
 		for(int j = i; j<tamVect; j++) {
 			float val = matriz[i].getValPos(j);
 			matriz[i].setValPos(matriz[j].getValPos(i),j);
 			matriz[j].setValPos(val,i);
 		}
+	}*/
+
+	//Vector traspuesto[tamVect];
+	float vector[tamVect][numVect];
+	for (int i = 0; i< tamVect; i++) {
+		for(int j = 0; j < numVect; j++) {
+			vector[i][j] = matriz[j].getValPos(i);
+		}
+		//traspuesto[i] = Vector(vector[i],numVect);
 	}
+	for (int i = 0; i< tamVect; i++) {
+			for(int j = 0; j < numVect; j++) {
+				matriz[i].setValPos(vector[i][j],j);
+			}
+	}
+	int aux = numVect;
+	numVect = tamVect;
+	tamVect = aux;
+	for (int i = 0; i< numVect; i++) {
+				for(int j = 0; j < tamVect; j++) {
+					cout << matriz[i].getValPos(j) << " ";
+			}
+			cout << "\n";
+	}
+	cout << "\n";
 }
 
 
