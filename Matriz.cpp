@@ -64,51 +64,37 @@ void Matriz::div(Matriz m1, float n) {
 void Matriz::mult(Matriz m1, Matriz m2) {
 	if(m1.getHor() == m2.getVert()) {
 		Vector* f1 = m1.getMatriz();
+		tamVect = m2.getHor();
+		numVect = m1.getVert();
+		m2.trasponer();
 		Vector* f2 = m2.getMatriz();
 
-		for(int i = 0; i<m1.getVert();i++) {
-			float aux = 0;
-			for(int j = 0;j<m1.getHor();j++) {
-				aux += f1[i].getValPos(j)*f2[j].getValPos(i);
-			}
 
+		for(int i = 0; i<numVect; i++) {
+			float vector[m2.getVert()];
+			for(int j = 0; j < tamVect; j++) {
+				vector[j] = f1[i].prodEscalar(f2[j]);
+			}
+			matriz[i] = Vector(vector,m2.getVert());
 		}
+
 	}
 }
 
 void Matriz::trasponer() {
 
-	/*for(int i = 0; i<numVect; i++) {
-		for(int j = i; j<tamVect; j++) {
-			float val = matriz[i].getValPos(j);
-			matriz[i].setValPos(matriz[j].getValPos(i),j);
-			matriz[j].setValPos(val,i);
-		}
-	}*/
-
-	//Vector traspuesto[tamVect];
+	Vector *traspuesto = new Vector[tamVect];
 	float vector[tamVect][numVect];
 	for (int i = 0; i< tamVect; i++) {
 		for(int j = 0; j < numVect; j++) {
 			vector[i][j] = matriz[j].getValPos(i);
 		}
-		//traspuesto[i] = Vector(vector[i],numVect);
-	}
-	for (int i = 0; i< tamVect; i++) {
-			for(int j = 0; j < numVect; j++) {
-				matriz[i].setValPos(vector[i][j],j);
-			}
+		traspuesto[i] = Vector(vector[i],numVect);
 	}
 	int aux = numVect;
 	numVect = tamVect;
 	tamVect = aux;
-	for (int i = 0; i< numVect; i++) {
-				for(int j = 0; j < tamVect; j++) {
-					cout << matriz[i].getValPos(j) << " ";
-			}
-			cout << "\n";
-	}
-	cout << "\n";
+	matriz = traspuesto;
 }
 
 

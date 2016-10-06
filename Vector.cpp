@@ -11,7 +11,10 @@
 
 	Vector::Vector(float vectorN[],int n){
 		lon = n;
-		vector = vectorN ;
+		vector = new float[n];
+		for (int i = 0; i < n;i++) {
+			vector[i] = vectorN[i];
+		}
 	}
 
 	Vector::~Vector() {}
