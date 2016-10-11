@@ -23,7 +23,7 @@ Matriz::Matriz(Vector vectores[],int vects) {
 Matriz::~Matriz() {}
 
 Matriz operator +(Matriz m1, Matriz m2) {
-	Vector suma [] = {};
+	Vector *suma = new Vector[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		suma[i] = m1.getFila(i) + m2.getFila(i);
 	}
