@@ -11,10 +11,11 @@
 	 */
 	Vector::Vector(float vectorN[],int n){
 		lon = n;
-		vector = new float[n];
+		vector = vectorN;
+		/*vector = new float[n];
 		for (int i = 0; i < n;i++) {
 			vector[i] = vectorN[i];
-		}
+		}*/
 	}
 
 	/*
@@ -49,7 +50,7 @@
 	 * Definición de la operación de suma de dos vectores.
 	 */
 	Vector operator +(Vector vector1, Vector vector2) {
-		float suma [vector1.getLon()];
+		float *suma = new float [vector1.getLon()];
 		for(int i=0; i<vector1.getLon(); i++){
 			suma[i] = vector1.getValPos(i) + vector2.getValPos(i);
 		}
@@ -60,7 +61,7 @@
 	 * Definición de la operación de resta de dos vectores.
 	 */
 	Vector operator -(Vector vector1, Vector vector2) {
-		float resta [vector1.getLon()];
+		float *resta = new float[vector1.getLon()];
 		for(int i=0; i<vector1.getLon(); i++){
 			resta[i] = vector1.getValPos(i) - vector2.getValPos(i);
 		}
@@ -72,7 +73,7 @@
 	 * por un escalar.
 	 */
 	Vector operator *(Vector vector1, float escalar) {
-		float mulEscalar [vector1.getLon()];
+		float *mulEscalar = new float[vector1.getLon()];
 		for(int i=0; i<vector1.getLon(); i++){
 			mulEscalar[i] = vector1.getValPos(i) * escalar;
 		}
@@ -84,7 +85,7 @@
 	 * un escalar.
 	 */
 	Vector operator /(Vector vector1, float escalar) {
-		float divEscalar [vector1.getLon()];
+		float *divEscalar = new float[vector1.getLon()];
 		for(int i=0; i<vector1.getLon(); i++){
 			divEscalar[i] = vector1.getValPos(i) / escalar;
 		}
@@ -106,7 +107,7 @@
 	 * Función que calcula el producto vectorial de dos vectores.
 	 */
 	Vector Vector::prodVectorial(Vector vector2) {
-		float mulVectorial [3];
+		float *mulVectorial = new float[3];
 		mulVectorial[0] = vector[1] * vector2.getValPos(2)
 								- vector[2] * vector2.getValPos(1);
 		mulVectorial[1] = vector[2] * vector2.getValPos(0)

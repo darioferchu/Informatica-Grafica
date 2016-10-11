@@ -10,7 +10,7 @@ int main() {
 	Vector v1 = Vector(t1,3);
 	Vector v2 = Vector(t2,3);
 
-	Vector suma = v1.prodVectorial(v2);
+	Vector suma = v1+v2;
 	float escalar = v1.prodEscalar(v2);
 
 	for(int i=0; i<v1.getLon(); i++){
