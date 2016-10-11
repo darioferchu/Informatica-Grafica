@@ -15,8 +15,8 @@ class Matriz {
 		Matriz(Vector[],int);
 		~Matriz();
 
-		//void mult(Matriz,Matriz);
-		//void trasponer();
+		Matriz mult(Matriz);
+		Matriz trasponer();
 
 		int getNumFilas();
 		int getNumColumnas();

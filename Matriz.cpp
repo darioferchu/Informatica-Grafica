@@ -32,32 +32,34 @@ Matriz operator +(Matriz m1, Matriz m2) {
 }
 
 Matriz operator -(Matriz m1, Matriz m2) {
-	Vector *resta = NULL;
+	Vector *resta = new Vector[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		resta[i] = m1.getFila(i) - m2.getFila(i);
 	}
+
 	return Matriz(resta,m1.getNumFilas());
 }
 
 Matriz operator *(Matriz m1, float escalar) {
-	Vector *mulEscalar = NULL;
+	Vector *mulEscalar = new Vector[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		mulEscalar[i] = m1.getFila(i) * escalar;
 	}
+
 	return Matriz(mulEscalar,m1.getNumFilas());
 }
 
 Matriz operator /(Matriz m1, float escalar) {
-	Vector *divEscalar = NULL;
+	Vector *divEscalar = new Vector[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		divEscalar[i] = m1.getFila(i) / escalar;
 	}
+
 	return Matriz(divEscalar,m1.getNumFilas());
 }
 
 
-/*void Matriz::mult(Matriz m1, Matriz m2) {
-	if(m1.getHor() == m2.getVert()) {
+Matriz Matriz::mult(Matriz m2) {
 		Vector* f1 = m1.getMatriz();
 		tamVect = m2.getHor();
 		numVect = m1.getVert();
@@ -76,35 +78,37 @@ Matriz operator /(Matriz m1, float escalar) {
 	}
 }
 
-void Matriz::trasponer() {
+Matriz Matriz::trasponer() {
 
-	Vector *traspuesto = new Vector[tamVect];
-	float vector[tamVect][numVect];
-	for (int i = 0; i< tamVect; i++) {
-		for(int j = 0; j < numVect; j++) {
-			vector[i][j] = matriz[j].getValPos(i);
+	Vector *traspuesto = new Vector[tamColumnas];
+	for (int i = 0; i< tamColumnas; i++) {
+		float *vector = new float [tamFilas];
+		for(int j = 0; j < tamFilas; j++) {
+			vector[j] = matriz[j].getValPos(i);
 		}
-		traspuesto[i] = Vector(vector[i],numVect);
+		traspuesto[i] = Vector(vector,tamColumnas);
 	}
-	int aux = numVect;
-	numVect = tamVect;
-	tamVect = aux;
-	matriz = traspuesto;
-}*/
+
+	return Matriz(traspuesto,tamColumnas);
+}
 
 
 Vector* Matriz::getMatriz() {
+
 	return matriz;
 }
 
 int Matriz::getNumFilas() {
+
 	return tamFilas;
 }
 
 Vector Matriz::getFila(int fila){
+
 	return matriz[fila];
 }
 
 int Matriz::getNumColumnas() {
+
 	return tamColumnas;
 }
