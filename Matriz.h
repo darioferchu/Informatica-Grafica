@@ -5,26 +5,35 @@ using namespace std;
 #include <iostream>
 #include "Vector.h"
 
+/*
+ * Clase Matriz con construcores, destructor y métodos
+ * para trabajar con ellas.
+ */
 class Matriz {
 	public:
 		Matriz();
 		Matriz(int, int);
 		Matriz(Vector[],int);
-		virtual ~Matriz();
+		~Matriz();
 
-		void suma(Matriz,Matriz);
-		void resta(Matriz,Matriz);
 		void mult(Matriz,Matriz);
-		void mult(Matriz,float);
-		void div(Matriz,float);
 		void trasponer();
 
-		int getHor();
-		int getVert();
+		int getNumFilas();
+		int getNumColumnas();
+		Vector getFila(int);
 
 		Vector* getMatriz();
 	private:
-		int numVect;
-		int tamVect;
+		int tamFilas;
+		int tamColumnas;
 		Vector *matriz;
 };
+
+/*
+ * Sobrecarga de operadores para matriz.
+ */
+Matriz operator +(Matriz, Matriz);
+Matriz operator -(Matriz, Matriz);
+Matriz operator *(Matriz, float);
+Matriz operator /(Matriz, float);

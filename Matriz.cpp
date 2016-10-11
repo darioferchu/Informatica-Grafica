@@ -10,54 +10,48 @@
 Matriz::Matriz() {}
 
 Matriz::Matriz(int hor, int vert) {
-	numVect = vert;
-	tamVect = hor;
+	tamFilas = vert;
+	tamColumnas = hor;
 }
 
 Matriz::Matriz(Vector vectores[],int vects) {
-	numVect = vects;
-	tamVect = vectores[0].getLon();
+	tamFilas = vects;
+	tamColumnas = vectores[0].getLon();
 	matriz = vectores;
 }
 
 Matriz::~Matriz() {}
 
-void Matriz::suma(Matriz m1, Matriz m2) {
-	if(m1.getVert() == m2.getVert()) {
-		Vector* sum1 = m1.getMatriz();
-		Vector* sum2 = m2.getMatriz();
-
-		for (int i=0;i<m1.getVert();i++) {
-			matriz[i].suma(sum1[i],sum2[i]);
-		}
+Matriz operator +(Matriz m1, Matriz m2) {
+	Vector *suma = NULL;
+	for(int i=0; i<m1.getNumFilas(); i++){
+		suma[i] = m1.getFila(i) + m2.getFila(i);
 	}
+	return Matriz(suma,m1.getNumFilas());
 }
 
-void Matriz::resta(Matriz m1, Matriz m2) {
-	if(m1.getVert() == m2.getVert()) {
-		Vector* re1 = m1.getMatriz();
-		Vector* re2 = m2.getMatriz();
-
-		for (int i=0;i<m1.getVert();i++) {
-			matriz[i].resta(re1[i],re2[i]);
-		}
+Matriz operator -(Matriz m1, Matriz m2) {
+	Vector *resta = NULL;
+	for(int i=0; i<m1.getNumFilas(); i++){
+		resta[i] = m1.getFila(i) - m2.getFila(i);
 	}
+	return Matriz(resta,m1.getNumFilas());
 }
 
-void Matriz::mult(Matriz m1, float n) {
-	Vector* vector = m1.getMatriz();
-
-	for (int i=0;i<m1.getVert();i++) {
-		matriz[i].mult(vector[i],n);
+Matriz operator *(Matriz m1, float escalar) {
+	Vector *mulEscalar = NULL;
+	for(int i=0; i<m1.getNumFilas(); i++){
+		mulEscalar[i] = m1.getFila(i) * escalar;
 	}
+	return Matriz(mulEscalar,m1.getNumFilas());
 }
 
-void Matriz::div(Matriz m1, float n) {
-	Vector* vector = m1.getMatriz();
-
-	for (int i=0;i<m1.getVert();i++) {
-		matriz[i].div(vector[i],n);
+Matriz operator /(Matriz m1, float escalar) {
+	Vector *divEscalar = NULL;
+	for(int i=0; i<m1.getNumFilas(); i++){
+		divEscalar[i] = m1.getFila(i) / escalar;
 	}
+	return Matriz(divEscalar,m1.getNumFilas());
 }
 
 
@@ -102,10 +96,14 @@ Vector* Matriz::getMatriz() {
 	return matriz;
 }
 
-int Matriz::getHor() {
-	return tamVect;
+int Matriz::getNumFilas() {
+	return tamFilas;
 }
 
-int Matriz::getVert() {
-	return numVect;
+Vector Matriz::getFila(int fila){
+	return matriz[fila];
+}
+
+int Matriz::getNumColumnas() {
+	return tamColumnas;
 }

@@ -1,22 +1,19 @@
-/*
- * Vector.h
- *
- *  Created on: 1 oct. 2016
- *      Author: Jorge
- */
+#include <cmath>
 
+/*
+ * Clase vector con construcores, destructor y métodos
+ * para trabajar con ellos.
+ */
 class Vector {
 	public:
 		Vector();
 		Vector(float vectorN[], int);
 		~Vector();
 
-		void suma(Vector,Vector);
-		void resta(Vector,Vector);
-		void mult(Vector,float);
-		void div(Vector,float);
-		void prodVectorial(Vector,Vector);
+		Vector prodVectorial(Vector);
 		float prodEscalar(Vector);
+		float modulo();
+
 		float getValPos(int);
 		void setValPos(float,int);
 		int getLon();
@@ -24,3 +21,11 @@ class Vector {
 		int lon;
 		float *vector;
 };
+
+/*
+ * Sobrecarga de operadores para vector.
+ */
+Vector operator +(Vector, Vector);
+Vector operator -(Vector, Vector);
+Vector operator *(Vector, float);
+Vector operator /(Vector, float);
