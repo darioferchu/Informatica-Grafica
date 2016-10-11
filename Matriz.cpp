@@ -23,10 +23,11 @@ Matriz::Matriz(Vector vectores[],int vects) {
 Matriz::~Matriz() {}
 
 Matriz operator +(Matriz m1, Matriz m2) {
-	Vector *suma = NULL;
+	Vector suma [] = {};
 	for(int i=0; i<m1.getNumFilas(); i++){
 		suma[i] = m1.getFila(i) + m2.getFila(i);
 	}
+
 	return Matriz(suma,m1.getNumFilas());
 }
 
@@ -55,7 +56,7 @@ Matriz operator /(Matriz m1, float escalar) {
 }
 
 
-void Matriz::mult(Matriz m1, Matriz m2) {
+/*void Matriz::mult(Matriz m1, Matriz m2) {
 	if(m1.getHor() == m2.getVert()) {
 		Vector* f1 = m1.getMatriz();
 		tamVect = m2.getHor();
@@ -89,7 +90,7 @@ void Matriz::trasponer() {
 	numVect = tamVect;
 	tamVect = aux;
 	matriz = traspuesto;
-}
+}*/
 
 
 Vector* Matriz::getMatriz() {

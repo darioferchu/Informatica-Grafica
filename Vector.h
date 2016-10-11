@@ -1,4 +1,6 @@
 #include <cmath>
+using namespace std;
+#include <iostream>
 
 /*
  * Clase vector con construcores, destructor y métodos
@@ -6,6 +8,7 @@
  */
 class Vector {
 	public:
+
 		Vector();
 		Vector(float vectorN[], int);
 		~Vector();

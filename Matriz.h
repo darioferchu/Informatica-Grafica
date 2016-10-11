@@ -1,7 +1,6 @@
 /*
  * Matriz.h
  */
-using namespace std;
 #include <iostream>
 #include "Vector.h"
 
@@ -16,8 +15,8 @@ class Matriz {
 		Matriz(Vector[],int);
 		~Matriz();
 
-		void mult(Matriz,Matriz);
-		void trasponer();
+		//void mult(Matriz,Matriz);
+		//void trasponer();
 
 		int getNumFilas();
 		int getNumColumnas();
