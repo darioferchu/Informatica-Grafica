@@ -28,7 +28,7 @@ int main() {
 		}
 		cout << "\n";
 	}
-	cout << "+\n";
+	cout << "X\n";
 	for(int i=0; i<m2.getNumFilas(); i++){
 		for(int j=0; j<m2.getNumColumnas(); j++){
 			cout << m2.getMatriz()[i].getValPos(j) << " ";
@@ -36,7 +36,7 @@ int main() {
 		cout << "\n";
 	}
 
-	Matriz m3 = m1 + m2;
+	Matriz m3 = m1.mult(m2);
 
 	cout << "=\n";
 	for(int i=0; i<m3.getNumFilas(); i++){

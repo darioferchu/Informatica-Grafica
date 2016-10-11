@@ -60,22 +60,17 @@ Matriz operator /(Matriz m1, float escalar) {
 
 
 Matriz Matriz::mult(Matriz m2) {
-		Vector* f1 = m1.getMatriz();
-		tamVect = m2.getHor();
-		numVect = m1.getVert();
-		m2.trasponer();
-		Vector* f2 = m2.getMatriz();
+		Vector* f2 = m2.trasponer().getMatriz();
+		Vector *result = new Vector[tamFilas];
 
-
-		for(int i = 0; i<numVect; i++) {
-			float vector[m2.getVert()];
-			for(int j = 0; j < tamVect; j++) {
-				vector[j] = f1[i].prodEscalar(f2[j]);
+		for(int i = 0; i<tamFilas; i++) {
+			float *vector = new float [m2.getNumColumnas()];
+			for(int j = 0; j < m2.getNumColumnas(); j++) {
+				vector[j] = matriz[i].prodEscalar(f2[j]);
 			}
-			matriz[i] = Vector(vector,m2.getVert());
+			result[i] = Vector(vector, m2.getNumColumnas());
 		}
-
-	}
+		return Matriz(result, tamFilas);
 }
 
 Matriz Matriz::trasponer() {
