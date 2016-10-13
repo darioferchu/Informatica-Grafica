@@ -1,8 +1,14 @@
 
-#include <iostream>
-#include <fstream>
+//#include <random>
+#include "Imagen.h"
 using namespace std;
-#include <imagen.cpp>
+
+/*int random() {
+	static std::random_device dev;
+	static std::default_random_engine gen(dev());
+	static std::uniform_int_distribution<int> dis(0,255);
+	return dis(gen);
+}*/
 
 int main() {
 
@@ -23,10 +29,10 @@ int main() {
 		ficheroSalida << "\n";
 	}
 	ficheroSalida.close();*/
-	int prueba [75][75];
+	int prueba [75*75];
 	for(int i=0; i<75; i++){
 		for(int j=0; j<75; j++){
-			prueba[i][j] = std::rand()%255;
+			prueba[i*j] = (i*j)%255;
 		}
 	}
 	Imagen ima = Imagen(75,75,prueba);

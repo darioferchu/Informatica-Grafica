@@ -20,5 +20,5 @@ private:
 	int altura;
 	int ancho;
 	int numDatosFila;
-	int *datos[];
+	int *datos;
 };
