@@ -11,7 +11,6 @@
 class Matriz {
 	public:
 		Matriz();
-		Matriz(int, int);
 		Matriz(Vector[],int);
 		~Matriz();
 
@@ -22,7 +21,6 @@ class Matriz {
 		int getNumColumnas();
 		Vector getFila(int);
 
-		Vector* getMatriz();
 	private:
 		int tamFilas;
 		int tamColumnas;

@@ -1,5 +1,5 @@
 
-#include "Matriz.h";
+#include "Matriz.h"
 using namespace std;
 #include <iostream>
 
@@ -24,14 +24,14 @@ int main() {
 	Matriz m2 = Matriz(aV2,3);
 	for(int i=0; i<m1.getNumFilas(); i++){
 		for(int j=0; j<m1.getNumColumnas(); j++){
-			cout << m1.getMatriz()[i].getValPos(j) << " ";
+			cout << m1.getFila(i).getValPos(j) << " ";
 		}
 		cout << "\n";
 	}
 	cout << "X\n";
 	for(int i=0; i<m2.getNumFilas(); i++){
 		for(int j=0; j<m2.getNumColumnas(); j++){
-			cout << m2.getMatriz()[i].getValPos(j) << " ";
+			cout << m2.getFila(i).getValPos(j) << " ";
 		}
 		cout << "\n";
 	}
@@ -41,7 +41,7 @@ int main() {
 	cout << "=\n";
 	for(int i=0; i<m3.getNumFilas(); i++){
 		for(int j=0; j<m3.getNumColumnas(); j++){
-			cout << m3.getMatriz()[i].getValPos(j) << " ";
+			cout << m3.getFila(i).getValPos(j) << " ";
 		}
 		cout << "\n";
 	}

@@ -8,7 +8,6 @@ using namespace std;
  */
 class Vector {
 	public:
-
 		Vector();
 		Vector(float vectorN[], int);
 		~Vector();
@@ -20,6 +19,7 @@ class Vector {
 		float getValPos(int);
 		void setValPos(float,int);
 		int getLon();
+
 	private:
 		int lon;
 		float *vector;
