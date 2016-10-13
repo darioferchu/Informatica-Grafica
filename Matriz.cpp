@@ -60,13 +60,13 @@ Matriz operator /(Matriz m1, float escalar) {
 
 
 Matriz Matriz::mult(Matriz m2) {
-		Vector* f2 = m2.trasponer().getMatriz();
+		Matriz m2T = m2.trasponer();
 		Vector *result = new Vector[tamFilas];
 
 		for(int i = 0; i<tamFilas; i++) {
 			float *vector = new float [m2.getNumColumnas()];
 			for(int j = 0; j < m2.getNumColumnas(); j++) {
-				vector[j] = matriz[i].prodEscalar(f2[j]);
+				vector[j] = matriz[i].prodEscalar(m2T.getFila(j));
 			}
 			result[i] = Vector(vector, m2.getNumColumnas());
 		}
