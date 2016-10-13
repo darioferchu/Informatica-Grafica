@@ -1,6 +1,4 @@
 #include <cmath>
-using namespace std;
-#include <iostream>
 
 /*
  * Clase vector con construcores, destructor y métodos
