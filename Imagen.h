@@ -1,15 +1,12 @@
-/*
- * Imagen.h
- *
- *  Created on: 13 oct. 2016
- *      Author: Jorge
- */
 
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 class Imagen {
 public:
 	Imagen(int, int);
-	Imagen(int, int, int**);
+	Imagen(int, int, int*);
 	virtual ~Imagen();
 
 	int getAltura();
@@ -23,5 +20,5 @@ private:
 	int altura;
 	int ancho;
 	int numDatosFila;
-	int **datos;
+	int *datos[];
 };

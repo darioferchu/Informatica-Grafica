@@ -1,36 +1,34 @@
 
-/*#include "Matriz.h";
+#include <iostream>
+#include <fstream>
+using namespace std;
+#include <imagen.cpp>
 
 int main() {
-	float t1[3] = {1.0, 2.0, 3.0};
-	float t2[3] = {4.0, 5.0, 13.0};
-	float t3[3] = {7.0, 8.0, -1.0};
 
-	Vector suma [3];
-	suma[0] = Vector(t1,3);
-	suma[1] = Vector(t2,3);
-	suma[2] = Vector(t3,3);
-
-	for(int i=0; i<3; i++){
-		for(int j=0; j<3; j++){
-			cout << suma[i].getValPos(j) << " ";
+	/*ofstream ficheroSalida;
+	ficheroSalida.open ("ficheroTexto.ppm");
+	ficheroSalida << "P3\n";
+	ficheroSalida << "# Imagen de prueba con c++\n";
+	ficheroSalida << "75 75\n";
+	ficheroSalida << "255\n";
+	for(int i=0; i<75; i++){
+		for(int j=0; j<75; j++){
+			int aleatorio1 = std::rand()%255;
+			int aleatorio2 = std::rand()%255;
+			int aleatorio3 = std::rand()%255;
+			ficheroSalida << aleatorio1 << " " << aleatorio2 << " "
+					<< aleatorio3 << " ";
 		}
-		cout << "\n";
+		ficheroSalida << "\n";
 	}
-
-	Matriz m1 = Matriz(suma,3);
-	Matriz m2 = Matriz(suma,3);
-
-	Matriz resultado;
-	resultado = m1 + m2;
-
-	cout << "hola" << "\n";
-
-	for(int i=0; i<resultado.getNumFilas(); i++){
-		for(int j=0; j<resultado.getNumColumnas(); j++){
-			cout << resultado.getFila(i).getValPos(j) << " ";
+	ficheroSalida.close();*/
+	int prueba [75][75];
+	for(int i=0; i<75; i++){
+		for(int j=0; j<75; j++){
+			prueba[i][j] = std::rand()%255;
 		}
-		cout << "\n";
 	}
-	return 0;
-}*/
+	Imagen ima = Imagen(75,75,prueba);
+	ima.crearFichero("Probando.ppm");
+}
