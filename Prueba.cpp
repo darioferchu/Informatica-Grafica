@@ -1,7 +1,7 @@
 
 //#include <random>
-#include "Imagen.h"
-using namespace std;
+//#include "Imagen.h"
+//using namespace std;
 
 /*int random() {
 	static std::random_device dev;
@@ -10,7 +10,7 @@ using namespace std;
 	return dis(gen);
 }*/
 
-int main() {
+/*int main() {
 
 	/*ofstream ficheroSalida;
 	ficheroSalida.open ("ficheroTexto.ppm");
@@ -29,12 +29,12 @@ int main() {
 		ficheroSalida << "\n";
 	}
 	ficheroSalida.close();*/
-	int prueba [75*75];
-	for(int i=0; i<75; i++){
-		for(int j=0; j<75; j++){
+	/*int prueba [2000*2000];
+	for(int i=0; i<2000; i++){
+		for(int j=0; j<2000; j++){
 			prueba[i*j] = (i*j)%255;
 		}
 	}
-	Imagen ima = Imagen(75,75,prueba);
-	ima.crearFichero("Probando.ppm");
-}
+	Imagen ima = Imagen(2000,2000,prueba);
+	ima.crearFichero("Probando.ppm");*/
+//}
