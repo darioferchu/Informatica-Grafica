@@ -25,7 +25,7 @@ Rayo::~Rayo() {}
  */
 Vector Rayo::getDireccion(){
 
-	return direccion;
+	return *direccion;
 }
 
 /*
@@ -33,5 +33,5 @@ Vector Rayo::getDireccion(){
  */
 Vector Rayo::getPunto() {
 
-	return punto;
+	return *punto;
 }
