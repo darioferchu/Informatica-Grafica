@@ -1,5 +1,5 @@
 
-#include "Esfera.h"
+#include "VectorT.h"
 
 /*
  * Clase Matriz con construcores, destructor y métodos
@@ -8,7 +8,7 @@
 class Matriz {
 	public:
 		Matriz();
-		Matriz(Vector[],int);
+		Matriz(VectorT[],int);
 		~Matriz();
 
 		Matriz mult(Matriz);
@@ -16,12 +16,12 @@ class Matriz {
 
 		int getNumFilas();
 		int getNumColumnas();
-		Vector getFila(int);
+		VectorT getFila(int);
 
 	private:
 		int tamFilas;
 		int tamColumnas;
-		Vector *matriz;
+		VectorT *matriz;
 };
 
 /*

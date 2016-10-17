@@ -1,17 +1,16 @@
 
-#include "Vector.h"
-#include "Objeto.h"
+#include "VectorT.h"
 
 class Esfera {
-public:
-	Esfera();
-	Esfera(Vector, float);
-	virtual ~Esfera();
+	public:
+		Esfera();
+		Esfera(VectorT, float);
+		virtual ~Esfera();
 
-	float getRadio();
-	Vector getCentro();
+		float getRadio();
+		VectorT getCentro();
 
-private:
-	float radio;
-	Vector centro;
+	private:
+		float radio;
+		VectorT centro;
 };

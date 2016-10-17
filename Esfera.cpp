@@ -3,7 +3,7 @@
 
 Esfera::Esfera(){}
 
-Esfera::Esfera(Vector centro, float radio) {
+Esfera::Esfera(VectorT centro, float radio) {
 	this->centro = centro;
 	this->radio = radio;
 }
@@ -16,6 +16,6 @@ float Esfera::getRadio() {
 	return radio;
 }
 
-Vector Esfera::getCentro() {
+VectorT Esfera::getCentro() {
 	return centro;
 }

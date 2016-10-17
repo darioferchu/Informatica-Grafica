@@ -13,7 +13,7 @@ Matriz::Matriz() {
 /*
  * Constructor de un objeto Matríz.
  */
-Matriz::Matriz(Vector vectores[],int vects) {
+Matriz::Matriz(VectorT vectores[],int vects) {
 
 	tamFilas = vects;
 	tamColumnas = vectores[0].getLon();
@@ -30,7 +30,7 @@ Matriz::~Matriz() {}
  */
 Matriz operator +(Matriz m1, Matriz m2) {
 
-	Vector *suma = new Vector[m1.getNumFilas()];
+	VectorT *suma = new VectorT[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		suma[i] = m1.getFila(i) + m2.getFila(i);
 	}
@@ -43,7 +43,7 @@ Matriz operator +(Matriz m1, Matriz m2) {
  */
 Matriz operator -(Matriz m1, Matriz m2) {
 
-	Vector *resta = new Vector[m1.getNumFilas()];
+	VectorT *resta = new VectorT[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		resta[i] = m1.getFila(i) - m2.getFila(i);
 	}
@@ -57,7 +57,7 @@ Matriz operator -(Matriz m1, Matriz m2) {
  */
 Matriz operator *(Matriz m1, float escalar) {
 
-	Vector *mulEscalar = new Vector[m1.getNumFilas()];
+	VectorT *mulEscalar = new VectorT[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		mulEscalar[i] = m1.getFila(i) * escalar;
 	}
@@ -72,7 +72,7 @@ Matriz operator *(Matriz m1, float escalar) {
  */
 Matriz operator /(Matriz m1, float escalar) {
 
-	Vector *divEscalar = new Vector[m1.getNumFilas()];
+	VectorT *divEscalar = new VectorT[m1.getNumFilas()];
 	for(int i=0; i<m1.getNumFilas(); i++){
 		divEscalar[i] = m1.getFila(i) / escalar;
 	}
@@ -87,13 +87,13 @@ Matriz operator /(Matriz m1, float escalar) {
 Matriz Matriz::mult(Matriz m2) {
 
 	Matriz m2T = m2.trasponer();
-	Vector *result = new Vector[tamFilas];
+	VectorT *result = new VectorT[tamFilas];
 	for(int i = 0; i<tamFilas; i++) {
 		float *vector = new float [m2.getNumColumnas()];
 		for(int j = 0; j < m2.getNumColumnas(); j++) {
 			vector[j] = matriz[i].prodEscalar(m2T.getFila(j));
 		}
-		result[i] = Vector(vector, m2.getNumColumnas());
+		result[i] = VectorT(vector, m2.getNumColumnas());
 	}
 
 	return Matriz(result, tamFilas);
@@ -104,13 +104,13 @@ Matriz Matriz::mult(Matriz m2) {
  */
 Matriz Matriz::trasponer() {
 
-	Vector *traspuesto = new Vector[tamColumnas];
+	VectorT *traspuesto = new VectorT[tamColumnas];
 	for (int i = 0; i< tamColumnas; i++) {
 		float *vector = new float [tamFilas];
 		for(int j = 0; j < tamFilas; j++) {
 			vector[j] = matriz[j].getValPos(i);
 		}
-		traspuesto[i] = Vector(vector,tamColumnas);
+		traspuesto[i] = VectorT(vector,tamColumnas);
 	}
 
 	return Matriz(traspuesto,tamColumnas);
@@ -127,7 +127,7 @@ int Matriz::getNumFilas() {
 /*
  * Función que devuelve el vector de una fila dada de la matríz.
  */
-Vector Matriz::getFila(int fila){
+VectorT Matriz::getFila(int fila){
 
 	return matriz[fila];
 }

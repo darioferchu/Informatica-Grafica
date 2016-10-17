@@ -23,8 +23,8 @@ int trazador(){
 			direccionRayo[0] = i-camara[0];
 			direccionRayo[1] = j-camara[1];
 			direccionRayo[2] = distancia-camara[2];
-			Vector punto = Vector(camara,3);
-			Vector direccion = Vector(direccionRayo,3);
+			VectorT punto = VectorT(camara,3);
+			VectorT direccion = VectorT(direccionRayo,3);
 			Rayo ray = Rayo(punto,direccion);
 			trazarRayos(ray,0);
 
@@ -43,9 +43,9 @@ int trazarRayos(Rayo ray, int rebote){
 		// Recorremos los objetos para saber intersecciones.
 		//for(int k=0; k<esferas.size(); k++){
 			//Esfera esfera = esferas.get(k);
-			Vector esferaCoo = Vector(esferaCoor,3);
+			VectorT esferaCoo = VectorT(esferaCoor,3);
 			Esfera esfera = Esfera(esferaCoo,3.0);
-			Vector intersecta = Interseccion(ray, esfera);
+			VectorT intersecta = Interseccion(ray, esfera);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta;
@@ -76,9 +76,9 @@ int trazarRayos(Rayo ray, int rebote){
 /*
  * Función que calcula si un cierto rayo intersecta con una esféra.
  */
-Vector Interseccion(Rayo ray, Esfera esfera) {
+VectorT Interseccion(Rayo ray, Esfera esfera) {
 		float a = 1.0;
-		Vector OC = ray.getPunto() - esfera.getCentro();
+		VectorT OC = ray.getPunto() - esfera.getCentro();
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
 		float c = OC.prodEscalar(OC) - pow(esfera.getRadio(),2);
 
@@ -89,14 +89,45 @@ Vector Interseccion(Rayo ray, Esfera esfera) {
  * Función que calcula la solución o soluciones de una cierta ecuación
  * de segundo grado.
  */
-Vector resolverSegundoGrado(float a,float b, float c) {
+VectorT resolverSegundoGrado(float a,float b, float c) {
 		float delta = pow(b,2) - 4*a*c;
 		if (delta<0.0) {
-			return Vector({},0);
+			return VectorT({},0);
 		} else if(delta == 0.0) {
-			return Vector({-b/(2.0*a)},1);
+			return VectorT({-b/(2.0*a)},1);
 		} else {
 			float raiz = sqrt(delta);
-			return Vector({(-b+raiz)/(2.0*a),(-b-raiz)/(2.0*a)},2);
+			return VectorT({(-b+raiz)/(2.0*a),(-b-raiz)/(2.0*a)},2);
 		}
+}
+
+/*
+ * Función que lee desde un fichero los datos de la escena.
+ */
+int leerFichero(){
+
+	// Declaramos los datos para trabajar con el fichero.
+	ifstream ficheroEntrada;
+	char linea[256];
+	string objeto;
+
+	// Leemos línea por línea el fichero.
+	ficheroEntrada.open(escena);
+	while(ficheroEntrada.getline(linea,256)){
+		objeto = strtok(linea,"-");
+		if(objeto.compare("Esfera")){	// Si es esfera...
+			// Declaramos variables.
+			float centro[3]; float radio;
+			// Leemos datos.
+			centro[0] = atof(strtok(NULL,"-"));
+			centro[1] = atof(strtok(NULL,"-"));
+			centro[2] = atof(strtok(NULL,"-"));
+			radio = atof(strtok(NULL,"-"));
+		} else{	// Si es triángulo...
+
+		}
+	}
+
+	ficheroEntrada.close(); // Cerramos el fichero de entrada.
+	return 0;
 }

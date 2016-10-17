@@ -8,13 +8,13 @@
 class Rayo {
 	public:
 		Rayo();
-		Rayo(Vector[],Vector[]);
+		Rayo(VectorT[],VectorT[]);
 		~Rayo();
 
-		Vector getDireccion();
-		Vector getPunto();
+		VectorT getDireccion();
+		VectorT getPunto();
 
 	private:
-		Vector *punto;
-		Vector *direccion;
+		VectorT *punto;
+		VectorT *direccion;
 };

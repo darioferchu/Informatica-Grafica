@@ -1,50 +1,36 @@
-/*
+
 #include "Matriz.h"
-using namespace std;
 #include <iostream>
+#include <fstream>
+using namespace std;
 
-int main() {
-	float t1[3] = {1.0, 2.0, 3.0};
-	float t2[3] = {4.0, 5.0, 13.0};
-	float t3[3] = {7.0, 8.0, -1.0};
-	float t4[3] = {2.0, 3.0, 8.0};
-	float t5[3] = {7.0, 6.0, 15.0};
-	float t6[3] = {9.0, 4.0, -3.0};
-	Vector v1 = Vector(t1,3);
-	Vector v2 = Vector(t2,3);
-	Vector v3 = Vector(t3,3);
-	Vector v4 = Vector(t4,3);
-	Vector v5 = Vector(t5,3);
-	Vector v6 = Vector(t6,3);
+/*
+ * Función que lee desde un fichero los datos de la escena.
+ */
+/*int leerFichero(){
 
-	Vector aV1[] = {v1,v2,v3};
-	Vector aV2[] = {v4,v5,v6};
+	// Declaramos los datos para trabajar con el fichero.
+	ifstream ficheroEntrada;
+	char linea[256];
+	string objeto;
 
-	Matriz m1 = Matriz(aV1,3);
-	Matriz m2 = Matriz(aV2,3);
-	for(int i=0; i<m1.getNumFilas(); i++){
-		for(int j=0; j<m1.getNumColumnas(); j++){
-			cout << m1.getFila(i).getValPos(j) << " ";
+	// Leemos línea por línea el fichero.
+	ficheroEntrada.open(escena);
+	while(ficheroEntrada.getline(linea,256)){
+		objeto = strtok(linea,"-");
+		if(objeto.compare("Esfera")){	// Si es esfera...
+			// Declaramos variables.
+			float centro[3]; float radio;
+			// Leemos datos.
+			centro[0] = atof(strtok(NULL,"-"));
+			centro[1] = atof(strtok(NULL,"-"));
+			centro[2] = atof(strtok(NULL,"-"));
+			radio = atof(strtok(NULL,"-"));
+		} else{	// Si es triángulo...
+
 		}
-		cout << "\n";
-	}
-	cout << "X\n";
-	for(int i=0; i<m2.getNumFilas(); i++){
-		for(int j=0; j<m2.getNumColumnas(); j++){
-			cout << m2.getFila(i).getValPos(j) << " ";
-		}
-		cout << "\n";
 	}
 
-	Matriz m3 = m1.mult(m2);
-
-	cout << "=\n";
-	for(int i=0; i<m3.getNumFilas(); i++){
-		for(int j=0; j<m3.getNumColumnas(); j++){
-			cout << m3.getFila(i).getValPos(j) << " ";
-		}
-		cout << "\n";
-	}
-
+	ficheroEntrada.close(); // Cerramos el fichero de entrada.
 	return 0;
 }*/

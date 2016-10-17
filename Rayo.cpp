@@ -9,7 +9,7 @@ Rayo::Rayo() {}
 /*
  * Constructor de un objeto Rayo.
  */
-Rayo::Rayo(Vector puntoR[], Vector direccionR[]) {
+Rayo::Rayo(VectorT puntoR[], VectorT direccionR[]) {
 
 	punto = puntoR;
 	direccion = direccionR;
@@ -23,7 +23,7 @@ Rayo::~Rayo() {}
 /*
  * Función que devuelve la dirección del rayo.
  */
-Vector Rayo::getDireccion(){
+VectorT Rayo::getDireccion(){
 
 	return *direccion;
 }
@@ -31,7 +31,7 @@ Vector Rayo::getDireccion(){
 /*
  * Función que devuelve el punto del rayo.
  */
-Vector Rayo::getPunto() {
+VectorT Rayo::getPunto() {
 
 	return *punto;
 }
