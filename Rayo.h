@@ -1,5 +1,5 @@
 
-#include "Vector.h"
+#include "Matriz.h"
 
 /*
  * Clase Rayo con construcores, destructor y métodos

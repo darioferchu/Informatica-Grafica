@@ -1,7 +1,5 @@
 #include <math.h>
-#include "Matriz.h"
 #include "Rayo.h"
-#include "Esfera.h"
 
 #define infinito 99999
 #define altura 500

@@ -7,7 +7,7 @@
 class Vector {
 	public:
 		Vector();
-		Vector(float vectorN[], int);
+		Vector(float[], int);
 		~Vector();
 
 		Vector prodVectorial(Vector);
