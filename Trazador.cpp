@@ -25,7 +25,7 @@ int trazador(){
 			direccionRayo[2] = distancia-camara[2];
 			VectorT punto = VectorT(camara,3);
 			VectorT direccion = VectorT(direccionRayo,3);
-			Rayo ray = Rayo(punto,direccion);
+			Rayo ray = Rayo(&punto,&direccion);
 			trazarRayos(ray,0);
 
 		}
@@ -45,7 +45,7 @@ int trazarRayos(Rayo ray, int rebote){
 			//Esfera esfera = esferas.get(k);
 			VectorT esferaCoo = VectorT(esferaCoor,3);
 			Esfera esfera = Esfera(esferaCoo,3.0);
-			VectorT intersecta = Interseccion(ray, esfera);
+			VectorT intersecta = interseccion(ray, esfera);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta;
@@ -76,7 +76,7 @@ int trazarRayos(Rayo ray, int rebote){
 /*
  * Función que calcula si un cierto rayo intersecta con una esféra.
  */
-VectorT Interseccion(Rayo ray, Esfera esfera) {
+VectorT interseccion(Rayo ray, Esfera esfera) {
 		float a = 1.0;
 		VectorT OC = ray.getPunto() - esfera.getCentro();
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
@@ -94,10 +94,12 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 		if (delta<0.0) {
 			return VectorT({},0);
 		} else if(delta == 0.0) {
-			return VectorT({-b/(2.0*a)},1);
+			float sol[] = {-b/(2.0*a)};
+			return VectorT(sol,1);
 		} else {
 			float raiz = sqrt(delta);
-			return VectorT({(-b+raiz)/(2.0*a),(-b-raiz)/(2.0*a)},2);
+			float sol[] = {(-b+raiz)/(2.0*a),(-b-raiz)/(2.0*a)};
+			return VectorT(sol,2);
 		}
 }
 

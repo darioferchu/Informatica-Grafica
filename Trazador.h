@@ -11,11 +11,11 @@ using namespace std;
 #define distancia 50
 #define escena "escena.txt"
 
-const float camara[] = {0.0, 0.0, 0.0};
-const float esferaCoor[] = {255.0, 255.0, 100.0};
+float camara[] = {0.0, 0.0, 0.0};
+float esferaCoor[] = {255.0, 255.0, 100.0};
 
 int trazador();
 int trazarRayos(Rayo, int);
-VectorT inteseccion(Rayo, Esfera);
+VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 int leerFichero();
