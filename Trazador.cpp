@@ -19,9 +19,11 @@ int trazador(){
 	for(int i=0; i<altura; i++){
 		for(int j=0; j<anchura; j++){
 			// Creamos rayo primario.
-			float puntoRayo[3] = {1.0,2.0,3.0}:
-			float direccionRayo[3] = {1.0,2.0,3.0}:
-			Vector punto = Vector(puntoRayo,3);
+			float direccionRayo[3];
+			direccionRayo[0] = i-camara[0];
+			direccionRayo[1] = j-camara[1];
+			direccionRayo[2] = distancia-camara[2];
+			Vector punto = Vector(camara,3);
 			Vector direccion = Vector(direccionRayo,3);
 			Rayo ray = Rayo(punto,direccion);
 			trazarRayos(ray,0);
@@ -33,14 +35,16 @@ int trazador(){
 
 int trazarRayos(Rayo ray, int rebote){
 	
-	if(rebote != 5){
+	//if(rebote != 5){
 		// Definimos la distancia inicial de intersección.
 		float distInterseccion = infinito;
 		// Definimos el objeto más cercano.
 		Esfera esfCercana;
 		// Recorremos los objetos para saber intersecciones.
-		for(int k=0; k<esferas.size(); k++){
-			Esfera esfera = esferas.get(k);
+		//for(int k=0; k<esferas.size(); k++){
+			//Esfera esfera = esferas.get(k);
+			Vector esferaCoo = Vector(esferaCoor,3);
+			Esfera esfera = Esfera(esferaCoo,3.0);
 			Vector intersecta = Interseccion(ray, esfera);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
@@ -53,11 +57,13 @@ int trazarRayos(Rayo ray, int rebote){
 			// Calculamos rayo sombra
 
 			// Recorremos luces si intersecta.
-			for(int k=0; k<luces.size(); k++){
-				if(intersecta){
+			//for(int k=0; k<luces.size(); k++){
+				//if(intersecta){
 					// le da la sombra y se sale del bucle.
-				}
-			}
+				//}
+			//}
+		} else{
+
 		}
 		// Añadir contribución color.
 		trazarRayos(ray,rebote+1);
