@@ -1,5 +1,5 @@
 
-#include "trazador.h"
+#include "Trazador.h"
 
 /*
  * Método principal que inicializa el trazador de rayos y los
@@ -52,7 +52,7 @@ int trazarRayos(Rayo ray, int rebote){
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfera;
 			}
-		}
+		//}
 		if(distInterseccion != infinito){
 			// Calculamos rayo sombra
 
@@ -67,10 +67,10 @@ int trazarRayos(Rayo ray, int rebote){
 		}
 		// Añadir contribución color.
 		trazarRayos(ray,rebote+1);
-	} else{
+	/*} else{
 		// Pintar color.
 
-	}
+	}*/
 }
 
 /*

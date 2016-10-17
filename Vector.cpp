@@ -4,7 +4,10 @@
 /*
 * Constructor de un objeto Vector vacío.
  */
-Vector::Vector(){}
+Vector::Vector(){
+	vector = NULL;
+	lon = 0;
+}
 
 /*
  * Contructor de un objeto Vector.

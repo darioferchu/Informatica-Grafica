@@ -4,7 +4,11 @@
 /*
  * Constructor de un objeto Matríz vacío.
  */
-Matriz::Matriz() {}
+Matriz::Matriz() {
+	tamColumnas = 0;
+	tamFilas = 0;
+	matriz = NULL;
+}
 
 /*
  * Constructor de un objeto Matríz.
