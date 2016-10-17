@@ -2,6 +2,8 @@
 #include "Rayo.h"
 #include "Esfera.h"
 #include <iostream>
+#include <string.h>
+#include <cstdlib>
 #include <fstream>
 using namespace std;
 
