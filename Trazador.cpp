@@ -25,6 +25,9 @@ int trazador(){
 			direccionRayo[2] = distancia-camara[2];
 			VectorT punto = VectorT(camara,3);
 			VectorT direccion = VectorT(direccionRayo,3);
+			/***************
+			 * OJO que se lo estamos mandando con dirección.
+			 */
 			Rayo ray = Rayo(&punto,&direccion);
 			trazarRayos(ray,0);
 
@@ -33,7 +36,7 @@ int trazador(){
 	return 0;
 }
 
-int trazarRayos(Rayo ray, int rebote){
+void trazarRayos(Rayo ray, int rebote){
 	
 	//if(rebote != 5){
 		// Definimos la distancia inicial de intersección.
@@ -48,7 +51,7 @@ int trazarRayos(Rayo ray, int rebote){
 			VectorT intersecta = interseccion(ray, esfera);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
-				distInterseccion = intersecta;
+				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfera;
 			}
@@ -92,7 +95,9 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 VectorT resolverSegundoGrado(float a,float b, float c) {
 		float delta = pow(b,2) - 4*a*c;
 		if (delta<0.0) {
-			return VectorT({},0);
+			//return VectorT({},0);
+			float sol[] = {-b/(2.0*a)};
+			return VectorT(sol,1);
 		} else if(delta == 0.0) {
 			float sol[] = {-b/(2.0*a)};
 			return VectorT(sol,1);

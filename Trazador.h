@@ -15,7 +15,7 @@ float camara[] = {0.0, 0.0, 0.0};
 float esferaCoor[] = {255.0, 255.0, 100.0};
 
 int trazador();
-int trazarRayos(Rayo, int);
+void trazarRayos(Rayo, int);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 int leerFichero();
