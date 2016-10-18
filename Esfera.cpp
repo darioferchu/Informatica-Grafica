@@ -3,9 +3,10 @@
 
 Esfera::Esfera(){}
 
-Esfera::Esfera(VectorT centro, float radio) {
+Esfera::Esfera(VectorT centro, float radio, VectorT color) {
 	this->centro = centro;
 	this->radio = radio;
+	this->color = color;
 }
 
 Esfera::~Esfera() {
@@ -18,4 +19,8 @@ float Esfera::getRadio() {
 
 VectorT Esfera::getCentro() {
 	return centro;
+}
+
+VectorT Esfera::getColor() {
+	return color;
 }
