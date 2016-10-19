@@ -58,6 +58,7 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfera;
 			}
+			*esfera++;
 		}
 		if(distInterseccion != infinito){
 			escribirColor(esfCercana.getColor().getValPos(0),
