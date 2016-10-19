@@ -11,10 +11,13 @@ int main(){
 	ficheroSalida.open ("ficheroEscena.ppm");
 	// Leemos el fichero.
 	leerFichero();
+	// Escribimos la cabecera del fichero de salida.
+	escribirCabecera();
 	// Iniciamos el trazador de rayos.
 	trazador();
 	// Cerramos el fichero.
 	ficheroSalida.close();
+	cout << "Probando4";
 	return 0;
 }
 
@@ -133,8 +136,8 @@ void leerFichero(){
 	ficheroEntrada.open(escena);
 	while(ficheroEntrada.getline(linea,256)){
 		objeto = strtok(linea,"*");
-		if(objeto.compare("Esfera")){	// Si es esfera...
-			cout << "probando\n";
+		if(objeto=="Esfera"){	// Si es esfera...
+			cout << objeto << "probando2\n";
 			// Declaramos variables.
 			float centro[3], color[3]; float radio;
 			// Leemos datos.
@@ -142,15 +145,17 @@ void leerFichero(){
 			centro[1] = atof(strtok(NULL,"*"));
 			centro[2] = atof(strtok(NULL,"*"));
 			radio = atof(strtok(NULL,"*"));
+			cout << "probando3\n";
 			color[0] = atof(strtok(NULL,"*"));
 			color[1] = atof(strtok(NULL,"*"));
 			color[2] = atof(strtok(NULL,"*"));
 			// Creamos la esfera y la introducimos en la lista.
 			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3));
 			objetos.push_back(esfera);
-		} else if(objeto.compare("Triangulo")){	// Si es triángulo...
+		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
 		} else{	// Si es la cabecera.
+			cout << objeto << "probando1\n";
 			// Leemos la altura, anchura y distancia al plano.
 			altura = stoi(objeto);
 			anchura = stoi(strtok(NULL,"*"));
@@ -170,4 +175,14 @@ void escribirColor(float R, float G, float B, int columna){
 	if(columna==(anchura-1)){
 		ficheroSalida << "\n";
 	}
+}
+
+/*
+ * Función que escribe la cabecera del fichero de salida.
+ */
+void escribirCabecera(){
+	ficheroSalida << "P3\n";
+	ficheroSalida << "# Escena\n";
+	ficheroSalida << anchura << " " << altura << "\n";
+	ficheroSalida << "255\n";
 }

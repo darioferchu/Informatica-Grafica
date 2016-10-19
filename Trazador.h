@@ -25,3 +25,4 @@ VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
 void escribirColor(float,float,float, int);
+void escribirCabecera();
