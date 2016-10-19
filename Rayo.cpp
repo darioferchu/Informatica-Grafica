@@ -2,11 +2,6 @@
 #include "Rayo.h"
 
 /*
- * Constructor de un objeto Rayo vacío.
- */
-Rayo::Rayo() {}
-
-/*
  * Constructor de un objeto Rayo.
  */
 Rayo::Rayo(VectorT puntoR[], VectorT direccionR[]) {

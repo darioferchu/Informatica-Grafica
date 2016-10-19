@@ -7,7 +7,6 @@
  */
 class Rayo {
 	public:
-		Rayo();
 		Rayo(VectorT[],VectorT[]);
 		~Rayo();
 

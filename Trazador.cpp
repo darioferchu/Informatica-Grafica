@@ -33,6 +33,7 @@ int trazador(){
 			direccionRayo[2] = distancia-camara[2];
 			VectorT punto = VectorT(camara,3);
 			VectorT direccion = VectorT(direccionRayo,3);
+			direccion = direccion / direccion.modulo();
 			/***************
 			 * OJO que se lo estamos mandando con dirección.
 			 */
@@ -58,6 +59,7 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 			Esfera esfActual = *esfera;
 			VectorT intersecta = interseccion(ray, esfActual);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
+				cout << "Intersecta\n";
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
@@ -171,8 +173,8 @@ void leerFichero(){
  */
 void escribirColor(float R, float G, float B, int columna){
 
-	ficheroSalida << R << " " << G << " " << B;
-	if(columna==(anchura-1)){
+	ficheroSalida << R << " " << G << " " << B <<" ";
+	if(columna%30==0){
 		ficheroSalida << "\n";
 	}
 }

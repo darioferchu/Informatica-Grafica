@@ -1,7 +1,9 @@
 
 #include "Esfera.h"
 
-Esfera::Esfera(){}
+Esfera::Esfera(){
+	radio = 0;
+}
 
 Esfera::Esfera(VectorT centro, float radio, VectorT color) {
 	this->centro = centro;
