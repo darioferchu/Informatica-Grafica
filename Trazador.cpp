@@ -17,7 +17,6 @@ int main(){
 	trazador();
 	// Cerramos el fichero.
 	ficheroSalida.close();
-	cout << "Probando4";
 	return 0;
 }
 
@@ -59,7 +58,6 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 			Esfera esfActual = *esfera;
 			VectorT intersecta = interseccion(ray, esfActual);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
-				cout << "Intersecta\n";
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
@@ -101,6 +99,19 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
 		float c = OC.prodEscalar(OC) - pow(esfera.getRadio(),2);
 
+		/*cout << "Origen: " << ray.getPunto().getValPos(0) << " " <<
+				ray.getPunto().getValPos(1) << " " << ray.getPunto().getValPos(2) <<
+				"\nDireccion: " <<  ray.getDireccion().getValPos(0) << " " <<
+				ray.getDireccion().getValPos(1) << " " << ray.getDireccion().getValPos(2)
+				<< "\n";
+
+		cout << "Centro: " << esfera.getCentro().getValPos(0) << " " <<
+				esfera.getCentro().getValPos(1) << " " <<
+				esfera.getCentro().getValPos(2) << "\n";
+
+		cout << "OC: " << OC.getValPos(0) << " " << OC.getValPos(1) << " " <<
+				OC.getValPos(2) << "\n";*/
+
 		return resolverSegundoGrado(a,b,c);
 }
 
@@ -115,11 +126,13 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 			float sol[] = {-infinito};
 			return VectorT(sol,0);
 		} else if(delta == 0.0) {
-			float sol[] = {-b/(2.0*a)};
+			float sol[] = {-b/(2*a)};
+			//cout << "sol1 " << sol[0] << "\n";
 			return VectorT(sol,1);
 		} else {
 			float raiz = sqrt(delta);
-			float sol[] = {(-b+raiz)/(2.0*a),(-b-raiz)/(2.0*a)};
+			float sol[] = {(-b+raiz)/(2*a),(-b-raiz)/(2*a)};
+			//cout << "sol2 " << sol[0] << " " << sol[1] << "\n";
 			return VectorT(sol,2);
 		}
 }
@@ -139,15 +152,15 @@ void leerFichero(){
 	while(ficheroEntrada.getline(linea,256)){
 		objeto = strtok(linea,"*");
 		if(objeto=="Esfera"){	// Si es esfera...
-			cout << objeto << "probando2\n";
 			// Declaramos variables.
-			float centro[3], color[3]; float radio;
+			float *centro = new float[3];
+			float *color = new float[3];
+			float radio;
 			// Leemos datos.
 			centro[0] = atof(strtok(NULL,"*"));
 			centro[1] = atof(strtok(NULL,"*"));
 			centro[2] = atof(strtok(NULL,"*"));
 			radio = atof(strtok(NULL,"*"));
-			cout << "probando3\n";
 			color[0] = atof(strtok(NULL,"*"));
 			color[1] = atof(strtok(NULL,"*"));
 			color[2] = atof(strtok(NULL,"*"));
@@ -157,7 +170,6 @@ void leerFichero(){
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
 		} else{	// Si es la cabecera.
-			cout << objeto << "probando1\n";
 			// Leemos la altura, anchura y distancia al plano.
 			altura = stoi(objeto);
 			anchura = stoi(strtok(NULL,"*"));
@@ -174,7 +186,7 @@ void leerFichero(){
 void escribirColor(float R, float G, float B, int columna){
 
 	ficheroSalida << R << " " << G << " " << B <<" ";
-	if(columna%30==0){
+	if(columna%20==0){
 		ficheroSalida << "\n";
 	}
 }
