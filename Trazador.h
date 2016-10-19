@@ -23,5 +23,5 @@ int trazador();
 void trazarRayos(Rayo, int, int);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
-int leerFichero();
+void leerFichero();
 void escribirColor(float,float,float, int);

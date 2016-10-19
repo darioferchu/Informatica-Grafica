@@ -9,6 +9,8 @@ int main(){
 
 	// Inicializamos el fichero de salida.
 	ficheroSalida.open ("ficheroEscena.ppm");
+	// Leemos el fichero.
+	leerFichero();
 	// Iniciamos el trazador de rayos.
 	trazador();
 	// Cerramos el fichero.
@@ -50,13 +52,13 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 		list<Esfera>::iterator esfera = objetos.begin();
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
-			VectorT esferaCoo = esfera.getCentro();
-			VectorT intersecta = interseccion(ray, esferaCoo);
+			Esfera esfActual = *esfera;
+			VectorT intersecta = interseccion(ray, esfActual);
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
-				esfCercana = esfera;
+				esfCercana = esfActual;
 			}
 			*esfera++;
 		}
@@ -120,7 +122,7 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 /*
  * Función que lee desde un fichero los datos de la escena.
  */
-int leerFichero(){
+void leerFichero(){
 
 	// Declaramos los datos para trabajar con el fichero.
 	ifstream ficheroEntrada;
@@ -132,6 +134,7 @@ int leerFichero(){
 	while(ficheroEntrada.getline(linea,256)){
 		objeto = strtok(linea,"*");
 		if(objeto.compare("Esfera")){	// Si es esfera...
+			cout << "probando\n";
 			// Declaramos variables.
 			float centro[3], color[3]; float radio;
 			// Leemos datos.
@@ -156,7 +159,6 @@ int leerFichero(){
 	}
 
 	ficheroEntrada.close(); // Cerramos el fichero de entrada.
-	return 0;
 }
 
 /*
