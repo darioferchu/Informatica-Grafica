@@ -57,7 +57,10 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;
 			VectorT intersecta = interseccion(ray, esfActual);
+			/*cout << columna << " " << esfera->getRadio() << " " << intersecta.getValPos(0)
+					<< " " << distInterseccion << "\n";*/
 			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
+				//cout << "Inter\n";
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
@@ -131,7 +134,7 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 			return VectorT(sol,1);
 		} else {
 			float raiz = sqrt(delta);
-			float sol[] = {(-b+raiz)/(2*a),(-b-raiz)/(2*a)};
+			float sol[] = {(-b-raiz)/(2*a),(-b+raiz)/(2*a)};
 			//cout << "sol2 " << sol[0] << " " << sol[1] << "\n";
 			return VectorT(sol,2);
 		}
