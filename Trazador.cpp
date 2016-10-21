@@ -13,6 +13,9 @@ int main(){
 	leerFichero();
 	// Escribimos la cabecera del fichero de salida.
 	escribirCabecera();
+	camara[0] = anchura/2;
+	camara[1] = altura/2;
+	camara[2] = (anchura/2)/tan(30);
 	// Iniciamos el trazador de rayos.
 	trazador();
 	// Cerramos el fichero.
