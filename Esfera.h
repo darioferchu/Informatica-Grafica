@@ -1,6 +1,10 @@
 
 #include "VectorT.h"
 
+/*
+ * Clase Esfera con construcores, destructor y métodos
+ * para trabajar con ellas.
+ */
 class Esfera {
 	public:
 		Esfera();

@@ -13,9 +13,6 @@ int main(){
 	leerFichero();
 	// Escribimos la cabecera del fichero de salida.
 	escribirCabecera();
-	camara[0] = anchura/2;
-	camara[1] = altura/2;
-	camara[2] = (anchura/2)/tan(30);
 	// Iniciamos el trazador de rayos.
 	trazador();
 	// Cerramos el fichero.
@@ -23,15 +20,20 @@ int main(){
 	return 0;
 }
 
-int trazador(){
+void trazador(){
 
+	//Establecemos los límites del plano.
+	int izquierdo = camara[0]-anchura/2;
+	int derecho = camara[0]+anchura/2;
+	int arriba = camara[1]+altura/2;
+	int abajo = camara[1]-altura/2;
 	// Recorremos anchura y altura del mapa pixeles.
-	for(int i=altura; i>0; i--){
-		for(int j=0; j<anchura; j++){
+	for(int i=arriba; i>abajo; i--){
+		for(int j=izquierdo; j<derecho; j++){
 			// Creamos rayo primario.
 			float direccionRayo[3];
-			direccionRayo[0] = i-camara[0];
-			direccionRayo[1] = j-camara[1];
+			direccionRayo[0] = j-camara[0];
+			direccionRayo[1] = i-camara[1];
 			direccionRayo[2] = distancia-camara[2];
 			VectorT punto = VectorT(camara,3);
 			VectorT direccion = VectorT(direccionRayo,3);
@@ -44,7 +46,6 @@ int trazador(){
 
 		}
 	}
-	return 0;
 }
 
 void trazarRayos(Rayo ray, int rebote, int columna){
@@ -59,11 +60,11 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;
+			// Se calcula la distancia de intersección.
 			VectorT intersecta = interseccion(ray, esfActual);
-			/*cout << columna << " " << esfera->getRadio() << " " << intersecta.getValPos(0)
-					<< " " << distInterseccion << "\n";*/
-			if(intersecta.getLon()>0 && intersecta.getValPos(0) < distInterseccion){
-				//cout << "Inter\n";
+			// Se comprueba si es la esfera más cercana.
+			if(intersecta.getLon() > 0 && intersecta.getValPos(0) > distancia
+					&& intersecta.getValPos(0) < distInterseccion){
 				// comparamos para obtener el objeto con distancia mínima.
 				distInterseccion = intersecta.getValPos(0);
 				// Se guarda el objeto con el que ha intersectado.
@@ -105,19 +106,6 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
 		float c = OC.prodEscalar(OC) - pow(esfera.getRadio(),2);
 
-		/*cout << "Origen: " << ray.getPunto().getValPos(0) << " " <<
-				ray.getPunto().getValPos(1) << " " << ray.getPunto().getValPos(2) <<
-				"\nDireccion: " <<  ray.getDireccion().getValPos(0) << " " <<
-				ray.getDireccion().getValPos(1) << " " << ray.getDireccion().getValPos(2)
-				<< "\n";
-
-		cout << "Centro: " << esfera.getCentro().getValPos(0) << " " <<
-				esfera.getCentro().getValPos(1) << " " <<
-				esfera.getCentro().getValPos(2) << "\n";
-
-		cout << "OC: " << OC.getValPos(0) << " " << OC.getValPos(1) << " " <<
-				OC.getValPos(2) << "\n";*/
-
 		return resolverSegundoGrado(a,b,c);
 }
 
@@ -133,12 +121,10 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 			return VectorT(sol,0);
 		} else if(delta == 0.0) {
 			float sol[] = {-b/(2*a)};
-			//cout << "sol1 " << sol[0] << "\n";
 			return VectorT(sol,1);
 		} else {
 			float raiz = sqrt(delta);
-			float sol[] = {(-b-raiz)/(2*a),(-b+raiz)/(2*a)};
-			//cout << "sol2 " << sol[0] << " " << sol[1] << "\n";
+			float sol[] = {(-b+raiz)/(2*a),(-b-raiz)/(2*a)};
 			return VectorT(sol,2);
 		}
 }
@@ -176,10 +162,16 @@ void leerFichero(){
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
 		} else{	// Si es la cabecera.
-			// Leemos la altura, anchura y distancia al plano.
+			// Leemos la altura y anchura del plano.
 			altura = stoi(objeto);
 			anchura = stoi(strtok(NULL,"*"));
-			distancia = atof(strtok(NULL,"*"));
+			// Leemos las coordenadas de la cámara.
+			camara[0] = stoi(strtok(NULL,"*"));
+			camara[1] = stoi(strtok(NULL,"*"));
+			camara[2] = stoi(strtok(NULL,"*"));
+			// Calculamos la distancia.
+			distancia = anchura*2;
+			cout << "distancia " << distancia;
 		}
 	}
 
@@ -191,8 +183,10 @@ void leerFichero(){
  */
 void escribirColor(float R, float G, float B, int columna){
 
+	// Escribimos el color del píxel.
 	ficheroSalida << R << " " << G << " " << B <<" ";
-	if(columna%20==0){
+	// Se escribe salto de línea al acabar una fila.
+	if(columna-anchura==0){
 		ficheroSalida << "\n";
 	}
 }
@@ -201,6 +195,8 @@ void escribirColor(float R, float G, float B, int columna){
  * Función que escribe la cabecera del fichero de salida.
  */
 void escribirCabecera(){
+
+	// Escribimos los datos de la cabecera del fichero.
 	ficheroSalida << "P3\n";
 	ficheroSalida << "# Escena\n";
 	ficheroSalida << anchura << " " << altura << "\n";
