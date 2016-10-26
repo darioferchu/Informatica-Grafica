@@ -1,6 +1,7 @@
 #include <math.h>
 #include "Rayo.h"
 #include "Esfera.h"
+#include "Fuente.h"
 #include <iostream>
 #include <string.h>
 #include <cstdlib>
@@ -23,14 +24,17 @@ float esferaCoor[] = {255.0, 255.0, 100.0};
 float anchura = 0.0;
 float altura = 0.0;
 float distancia = 0.0;
+float tamPixel = 0.0;
 ofstream ficheroSalida;
 list<Esfera> objetos;
+list<Fuente> fuentesLuz;
 
 /*
  * Métodos del trazador.
  */
 void trazador();
 void trazarRayos(Rayo, int, int);
+void trazarRayosSombra(Rayo, VectorT, int);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();

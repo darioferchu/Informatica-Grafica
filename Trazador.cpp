@@ -23,13 +23,13 @@ int main(){
 void trazador(){
 
 	//Establecemos los límites del plano.
-	int izquierdo = camara[0]-anchura/2;
-	int derecho = camara[0]+anchura/2;
-	int arriba = camara[1]+altura/2;
-	int abajo = camara[1]-altura/2;
+	float izquierdo = camara[0]-anchura/2;
+	float derecho = camara[0]+anchura/2;
+	float arriba = camara[1]+altura/2;
+	float abajo = camara[1]-altura/2;
 	// Recorremos anchura y altura del mapa pixeles.
-	for(int i=arriba; i>abajo; i--){
-		for(int j=izquierdo; j<derecho; j++){
+	for(float i=arriba-tamPixel/2; i>abajo; i=i-tamPixel){
+		for(float j=izquierdo+tamPixel/2; j<derecho; j=j+tamPixel){
 			// Creamos rayo primario.
 			float direccionRayo[3];
 			direccionRayo[0] = j-camara[0];
@@ -49,7 +49,7 @@ void trazador(){
 }
 
 void trazarRayos(Rayo ray, int rebote, int columna){
-	
+
 	//if(rebote != 5){
 		// Definimos la distancia inicial de intersección.
 		float distInterseccion = infinito;
@@ -57,11 +57,12 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 		Esfera esfCercana;
 		// Creamos el iterador para recorrer la lista.
 		list<Esfera>::iterator esfera = objetos.begin();
+		VectorT intersecta;
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;
 			// Se calcula la distancia de intersección.
-			VectorT intersecta = interseccion(ray, esfActual);
+			intersecta = interseccion(ray, esfActual);
 			// Se comprueba si es la esfera más cercana.
 			if(intersecta.getLon() > 0 && intersecta.getValPos(0) > distancia
 					&& intersecta.getValPos(0) < distInterseccion){
@@ -77,14 +78,7 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 					esfCercana.getColor().getValPos(1),esfCercana.getColor().getValPos(2),
 					columna);
 
-			// Calculamos rayo sombra
-
-			// Recorremos luces si intersecta.
-			//for(int k=0; k<luces.size(); k++){
-				//if(intersecta){
-					// le da la sombra y se sale del bucle.
-				//}
-			//}
+			trazarRayosSombra(ray, intersecta, columna);
 		} else{
 			escribirColor(0,0,0,columna);
 		}
@@ -95,6 +89,39 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 
 	}*/
 }
+
+
+
+void trazarRayosSombra(Rayo ray, VectorT intersectado, int columna) {
+	//Se calcula el punto con el que se intersecta.
+	VectorT puntoIntersectado = ray.getPunto() +
+			(ray.getDireccion() * intersectado.getValPos(0));
+	//Se crea el iterador para recorrer fuentes de luz.
+	list<Fuente>::iterator fuente = fuentesLuz.begin();
+	// Recorremos luces si intersecta.
+	while(fuente != fuentesLuz.end()){
+		Fuente fuenteActual = *fuente;
+		//Se obtiene la direccion del rayo sombra.
+		VectorT dirRSombra = fuenteActual.getPunto() - puntoIntersectado;
+		Rayo rayoSombra = Rayo(&dirRSombra, &puntoIntersectado);
+		list<Esfera>::iterator esfera = objetos.begin();
+		VectorT intersecta;
+		// Recorremos los objetos para saber intersecciones.
+		while(esfera != objetos.end()){
+			Esfera esfActual = *esfera;
+			// Se calcula la distancia de intersección.
+			intersecta = interseccion(ray, esfActual);
+			// Se comprueba si es la esfera más cercana.
+			if(intersecta.getLon() > 0 && intersecta.getValPos(0) >= 0){
+				//Calcular colores
+
+			}
+			*esfera++;
+		}
+		*fuente++;
+	}
+}
+
 
 /*
  * Función que calcula si un cierto rayo intersecta con una esféra.
@@ -161,17 +188,28 @@ void leerFichero(){
 			objetos.push_back(esfera);
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
+		} else if(objeto=="Luz") {
+
+			float *punto = new float[3];
+			float potencia;
+			// Leemos datos.
+			punto[0] = atof(strtok(NULL,"*"));
+			punto[1] = atof(strtok(NULL,"*"));
+			punto[2] = atof(strtok(NULL,"*"));
+			potencia = atof(strtok(NULL,"*"));
+			Fuente fuente = Fuente(VectorT(punto,3), potencia);
+			fuentesLuz.push_back(fuente);
 		} else{	// Si es la cabecera.
 			// Leemos la altura y anchura del plano.
-			altura = stoi(objeto);
-			anchura = stoi(strtok(NULL,"*"));
+			tamPixel = stof(objeto);
+			altura = stof(strtok(NULL,"*"));
+			anchura = stof(strtok(NULL,"*"));
 			// Leemos las coordenadas de la cámara.
-			camara[0] = stoi(strtok(NULL,"*"));
-			camara[1] = stoi(strtok(NULL,"*"));
-			camara[2] = stoi(strtok(NULL,"*"));
+			camara[0] = atof(strtok(NULL,"*"));
+			camara[1] = atof(strtok(NULL,"*"));
+			camara[2] = atof(strtok(NULL,"*"));
 			// Calculamos la distancia.
 			distancia = anchura*2;
-			cout << "distancia " << distancia;
 		}
 	}
 
@@ -199,6 +237,6 @@ void escribirCabecera(){
 	// Escribimos los datos de la cabecera del fichero.
 	ficheroSalida << "P3\n";
 	ficheroSalida << "# Escena\n";
-	ficheroSalida << anchura << " " << altura << "\n";
+	ficheroSalida << anchura/tamPixel << " " << altura/tamPixel << "\n";
 	ficheroSalida << "255\n";
 }

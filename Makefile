@@ -1,9 +1,9 @@
-COMPILAR=g++ -std=c++0x -Wall
+COMPILAR=g++ -std=c++11 -Wall
 
 all: trazador.exe
 
-trazador.exe: Trazador.o Rayo.o Esfera.o Objeto.o Imagen.o Matriz.o VectorT.o 
-	$(COMPILAR) -o trazador.exe Trazador.o Rayo.o Esfera.o Objeto.o Imagen.o Matriz.o VectorT.o 
+trazador.exe: Trazador.o Rayo.o Esfera.o Fuente.o Objeto.o Imagen.o Matriz.o VectorT.o 
+	$(COMPILAR) -o trazador.exe Trazador.o Rayo.o Esfera.o Fuente.o Objeto.o Imagen.o Matriz.o VectorT.o 
 	
 Trazador.o: Trazador.cpp Trazador.h
 	$(COMPILAR) -c Trazador.cpp
@@ -13,6 +13,9 @@ Rayo.o: Rayo.cpp Rayo.h
 
 Esfera.o: Esfera.cpp Esfera.h
 	$(COMPILAR) -c Esfera.cpp
+	
+Fuente.o: Fuente.cpp Fuente.h
+	$(COMPILAR) -c Fuente.cpp
 
 Objeto.o: Objeto.cpp Objeto.h
 	$(COMPILAR) -c Objeto.cpp
