@@ -34,7 +34,7 @@ list<Fuente> fuentesLuz;
  */
 void trazador();
 void trazarRayos(Rayo, int, int);
-void trazarRayosSombra(Rayo, VectorT, int);
+void trazarRayosSombra(Rayo, float, int, Esfera);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();

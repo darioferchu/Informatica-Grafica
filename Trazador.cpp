@@ -74,11 +74,7 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 			*esfera++;
 		}
 		if(distInterseccion != infinito){
-			escribirColor(esfCercana.getColor().getValPos(0),
-					esfCercana.getColor().getValPos(1),esfCercana.getColor().getValPos(2),
-					columna);
-
-			trazarRayosSombra(ray, intersecta, columna);
+			trazarRayosSombra(ray, distInterseccion, columna,esfCercana);
 		} else{
 			escribirColor(0,0,0,columna);
 		}
@@ -92,33 +88,50 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 
 
 
-void trazarRayosSombra(Rayo ray, VectorT intersectado, int columna) {
+void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera origen) {
 	//Se calcula el punto con el que se intersecta.
 	VectorT puntoIntersectado = ray.getPunto() +
-			(ray.getDireccion() * intersectado.getValPos(0));
+			(ray.getDireccion() * distInterseccion);
+	VectorT normal = puntoIntersectado - origen.getCentro();
+	normal = normal / normal.modulo();
+	float bias = 0.01;
 	//Se crea el iterador para recorrer fuentes de luz.
 	list<Fuente>::iterator fuente = fuentesLuz.begin();
+	bool sombra = true;
+	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
 	while(fuente != fuentesLuz.end()){
 		Fuente fuenteActual = *fuente;
-		//Se obtiene la direccion del rayo sombra.
-		VectorT dirRSombra = fuenteActual.getPunto() - puntoIntersectado;
-		Rayo rayoSombra = Rayo(&dirRSombra, &puntoIntersectado);
+		//Se obtiene la direcci�n del rayo sombra.
+		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
+		dirRSombra = dirRSombra / dirRSombra.modulo();
+		Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);
 		list<Esfera>::iterator esfera = objetos.begin();
 		VectorT intersecta;
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;
 			// Se calcula la distancia de intersección.
-			intersecta = interseccion(ray, esfActual);
+			intersecta = interseccion(rayoSombra, esfActual);
 			// Se comprueba si es la esfera más cercana.
-			if(intersecta.getLon() > 0 && intersecta.getValPos(0) >= 0){
+			if(intersecta.getValPos(0) >= 0){
 				//Calcular colores
-
+				break;
 			}
 			*esfera++;
 		}
+		if(intersecta.getValPos(0) < 0) {
+			sombra = false;
+			break;
+		}
 		*fuente++;
+	}
+	if(sombra) {
+		escribirColor(0, 0, 0, columna);
+	} else {
+		escribirColor(origen.getColor().getValPos(0),
+				origen.getColor().getValPos(1), origen.getColor().getValPos(2),
+					columna);
 	}
 }
 
@@ -151,7 +164,7 @@ VectorT resolverSegundoGrado(float a,float b, float c) {
 			return VectorT(sol,1);
 		} else {
 			float raiz = sqrt(delta);
-			float sol[] = {(-b+raiz)/(2*a),(-b-raiz)/(2*a)};
+			float sol[] = {(-b-raiz)/(2*a), (-b+raiz)/(2*a)};
 			return VectorT(sol,2);
 		}
 }
@@ -176,13 +189,13 @@ void leerFichero(){
 			float *color = new float[3];
 			float radio;
 			// Leemos datos.
-			centro[0] = atof(strtok(NULL,"*"));
-			centro[1] = atof(strtok(NULL,"*"));
-			centro[2] = atof(strtok(NULL,"*"));
-			radio = atof(strtok(NULL,"*"));
-			color[0] = atof(strtok(NULL,"*"));
-			color[1] = atof(strtok(NULL,"*"));
-			color[2] = atof(strtok(NULL,"*"));
+			centro[0] = stof(strtok(NULL,"*"));
+			centro[1] = stof(strtok(NULL,"*"));
+			centro[2] = stof(strtok(NULL,"*"));
+			radio = stof(strtok(NULL,"*"));
+			color[0] = stof(strtok(NULL,"*"));
+			color[1] = stof(strtok(NULL,"*"));
+			color[2] = stof(strtok(NULL,"*"));
 			// Creamos la esfera y la introducimos en la lista.
 			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3));
 			objetos.push_back(esfera);
@@ -193,10 +206,10 @@ void leerFichero(){
 			float *punto = new float[3];
 			float potencia;
 			// Leemos datos.
-			punto[0] = atof(strtok(NULL,"*"));
-			punto[1] = atof(strtok(NULL,"*"));
-			punto[2] = atof(strtok(NULL,"*"));
-			potencia = atof(strtok(NULL,"*"));
+			punto[0] = stof(strtok(NULL,"*"));
+			punto[1] = stof(strtok(NULL,"*"));
+			punto[2] = stof(strtok(NULL,"*"));
+			potencia = stof(strtok(NULL,"*"));
 			Fuente fuente = Fuente(VectorT(punto,3), potencia);
 			fuentesLuz.push_back(fuente);
 		} else{	// Si es la cabecera.
@@ -205,9 +218,9 @@ void leerFichero(){
 			altura = stof(strtok(NULL,"*"));
 			anchura = stof(strtok(NULL,"*"));
 			// Leemos las coordenadas de la cámara.
-			camara[0] = atof(strtok(NULL,"*"));
-			camara[1] = atof(strtok(NULL,"*"));
-			camara[2] = atof(strtok(NULL,"*"));
+			camara[0] = stof(strtok(NULL,"*"));
+			camara[1] = stof(strtok(NULL,"*"));
+			camara[2] = stof(strtok(NULL,"*"));
 			// Calculamos la distancia.
 			distancia = anchura*2;
 		}
