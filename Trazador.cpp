@@ -101,10 +101,11 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
 	Fuente fuenteActual;
+	VectorT dirRSombra;
 	while(fuente != fuentesLuz.end()){
 		fuenteActual = *fuente;
 		//Se obtiene la dirección del rayo sombra.
-		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
+		dirRSombra = fuenteActual.getPunto() - puntoOrigen;
 		dirRSombra = dirRSombra / dirRSombra.modulo();
 		Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);
 		list<Esfera>::iterator esfera = objetos.begin();
@@ -130,11 +131,8 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	if(sombra) {
 		escribirColor(0, 0, 0, columna);
 	} else {
-		//Se obtiene el vector direccion de la luz que llegara a la camara.
-		VectorT lr = ray.getPunto() - puntoIntersectado;
-		lr = lr / lr.modulo();
 		//Se obtiene el factor de incidencia de la luz.
-		float facingRatio = lr.prodEscalar(normal);
+		float facingRatio = dirRSombra.prodEscalar(normal);
 		if(facingRatio < 0) {	//Si es menor que 0, se iguala a 0.
 			facingRatio = 0;
 		}
