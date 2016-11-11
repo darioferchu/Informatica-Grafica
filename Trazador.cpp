@@ -100,8 +100,9 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	bool sombra = true;
 	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
+	Fuente fuenteActual;
 	while(fuente != fuentesLuz.end()){
-		Fuente fuenteActual = *fuente;
+		fuenteActual = *fuente;
 		//Se obtiene la dirección del rayo sombra.
 		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
 		dirRSombra = dirRSombra / dirRSombra.modulo();
@@ -129,9 +130,31 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	if(sombra) {
 		escribirColor(0, 0, 0, columna);
 	} else {
-		escribirColor(origen.getColor().getValPos(0),
-				origen.getColor().getValPos(1), origen.getColor().getValPos(2),
-					columna);
+		//Se obtiene el vector direccion de la luz que llegara a la camara.
+		VectorT lr = ray.getPunto() - puntoIntersectado;
+		lr = lr / lr.modulo();
+		//Se obtiene el factor de incidencia de la luz.
+		float facingRatio = lr.prodEscalar(normal);
+		if(facingRatio < 0) {	//Si es menor que 0, se iguala a 0.
+			facingRatio = 0;
+		}
+		//Se obtiene el color en el punto intersectado.
+		float R = origen.getColor().getValPos(0)*fuenteActual.getPotencia()*facingRatio;
+		float G = origen.getColor().getValPos(1)*fuenteActual.getPotencia()*facingRatio;
+		float B = origen.getColor().getValPos(2)*fuenteActual.getPotencia()*facingRatio;
+
+		//Si sobrepasa el maximo se iguala a 255.
+		if(R > 255) {
+			R = 255;
+		}
+		if(G > 255) {
+			G = 255;
+		}
+		if(B > 255) {
+			B = 255;
+		}
+
+		escribirColor(R, G, B, columna);
 	}
 }
 
