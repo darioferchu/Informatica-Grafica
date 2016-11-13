@@ -100,12 +100,11 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	bool sombra = true;
 	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
-	Fuente fuenteActual;
-	VectorT dirRSombra;
+	float luzTotal;
 	while(fuente != fuentesLuz.end()){
-		fuenteActual = *fuente;
+		Fuente fuenteActual = *fuente;
 		//Se obtiene la dirección del rayo sombra.
-		dirRSombra = fuenteActual.getPunto() - puntoOrigen;
+		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
 		dirRSombra = dirRSombra / dirRSombra.modulo();
 		Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);
 		list<Esfera>::iterator esfera = objetos.begin();
@@ -124,22 +123,22 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 		}
 		if(intersecta.getValPos(0) < 0) {
 			sombra = false;
-			break;
+			//Se obtiene el factor de incidencia de la luz.
+			float cos = dirRSombra.prodEscalar(normal);
+			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
+				cos = 0;
+			}
+			luzTotal += cos*fuenteActual.getPotencia();
 		}
 		*fuente++;
 	}
 	if(sombra) {
 		escribirColor(0, 0, 0, columna);
 	} else {
-		//Se obtiene el factor de incidencia de la luz.
-		float facingRatio = dirRSombra.prodEscalar(normal);
-		if(facingRatio < 0) {	//Si es menor que 0, se iguala a 0.
-			facingRatio = 0;
-		}
 		//Se obtiene el color en el punto intersectado.
-		float R = origen.getColor().getValPos(0)*fuenteActual.getPotencia()*facingRatio;
-		float G = origen.getColor().getValPos(1)*fuenteActual.getPotencia()*facingRatio;
-		float B = origen.getColor().getValPos(2)*fuenteActual.getPotencia()*facingRatio;
+		float R = origen.getColor().getValPos(0)*luzTotal;
+		float G = origen.getColor().getValPos(1)*luzTotal;
+		float B = origen.getColor().getValPos(2)*luzTotal;
 
 		//Si sobrepasa el maximo se iguala a 255.
 		if(R > 255) {
