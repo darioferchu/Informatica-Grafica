@@ -5,7 +5,7 @@
  * Constructor de un objeto fuente vacío.
  */
 Fuente::Fuente(){
-
+	potencia = 0.0;
 }
 
 /*
