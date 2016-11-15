@@ -128,7 +128,10 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
 				cos = 0;
 			}
-			luzTotal += cos*fuenteActual.getPotencia();
+			float distanciaFuente = (fuenteActual.getPunto() - puntoOrigen).modulo();
+			float luzIncidente = fuenteActual.getPotencia()
+					/(distanciaFuente*distanciaFuente);
+			luzTotal += cos*luzIncidente;
 		}
 		*fuente++;
 	}
