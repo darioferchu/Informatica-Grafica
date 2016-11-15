@@ -100,7 +100,7 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	bool sombra = true;
 	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
-	float luzTotal;
+	float luzTotal = 0.0;
 	while(fuente != fuentesLuz.end()){
 		Fuente fuenteActual = *fuente;
 		//Se obtiene la direcci�n del rayo sombra.
@@ -136,9 +136,9 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 		escribirColor(0, 0, 0, columna);
 	} else {
 		//Se obtiene el color en el punto intersectado.
-		float R = origen.getColor().getValPos(0)*luzTotal;
-		float G = origen.getColor().getValPos(1)*luzTotal;
-		float B = origen.getColor().getValPos(2)*luzTotal;
+		int R = origen.getColor().getValPos(0)*luzTotal;
+		int G = origen.getColor().getValPos(1)*luzTotal;
+		int B = origen.getColor().getValPos(2)*luzTotal;
 
 		//Si sobrepasa el maximo se iguala a 255.
 		if(R > 255) {
@@ -252,7 +252,7 @@ void leerFichero(){
 /*
  * Función que escribe en el fichero el color del pixel.
  */
-void escribirColor(float R, float G, float B, int columna){
+void escribirColor(int R, int G, int B, int columna){
 
 	// Escribimos el color del píxel.
 	ficheroSalida << R << " " << G << " " << B <<" ";
