@@ -14,9 +14,15 @@ class Esfera {
 		float getRadio();
 		VectorT getCentro();
 		VectorT getColor();
+		VectorT getKd();
+		float getKs();
+		float getAlpha();
 
 	private:
 		float radio;
 		VectorT centro;
 		VectorT color;
+		VectorT Kd;
+		float Ks = 255;
+		float alpha = 10;
 };

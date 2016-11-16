@@ -38,5 +38,6 @@ void trazarRayosSombra(Rayo, float, int, Esfera);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
-void escribirColor(int,int,int, int);
+void escribirColor(float,float,float, int);
 void escribirCabecera();
+VectorT phong(Rayo, VectorT, VectorT, Esfera);

@@ -100,7 +100,8 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 	bool sombra = true;
 	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 	// Recorremos luces si intersecta.
-	float luzTotal = 0.0;
+	float inicial[3] = {0,0,0};
+	VectorT luzTotal = VectorT(inicial,3);
 	while(fuente != fuentesLuz.end()){
 		Fuente fuenteActual = *fuente;
 		//Se obtiene la direcci�n del rayo sombra.
@@ -116,7 +117,6 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 			intersecta = interseccion(rayoSombra, esfActual);
 			// Se comprueba si es la esfera más cercana.
 			if(intersecta.getValPos(0) >= 0){
-				//Calcular colores
 				break;
 			}
 			*esfera++;
@@ -128,10 +128,15 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
 				cos = 0;
 			}
+			//Se obtiene la distancia a la fuente de luz.
 			float distanciaFuente = (fuenteActual.getPunto() - puntoOrigen).modulo();
+			//Se obtiene la potencia de la luz que incide en el punto.
 			float luzIncidente = fuenteActual.getPotencia()
 					/(distanciaFuente*distanciaFuente);
-			luzTotal += cos*luzIncidente;
+			//Se calcula como incide la luz mediante la BDRF de Phong.
+			VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen);
+			//Se obtiene la luz total del punto.
+			luzTotal = luzTotal+(p*cos*luzIncidente);
 		}
 		*fuente++;
 	}
@@ -139,10 +144,9 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 		escribirColor(0, 0, 0, columna);
 	} else {
 		//Se obtiene el color en el punto intersectado.
-		int R = origen.getColor().getValPos(0)*luzTotal;
-		int G = origen.getColor().getValPos(1)*luzTotal;
-		int B = origen.getColor().getValPos(2)*luzTotal;
-
+		float R = luzTotal.getValPos(0);
+		float G =  luzTotal.getValPos(1);;
+		float B =  luzTotal.getValPos(2);;
 		//Si sobrepasa el maximo se iguala a 255.
 		if(R > 255) {
 			R = 255;
@@ -255,10 +259,10 @@ void leerFichero(){
 /*
  * Función que escribe en el fichero el color del pixel.
  */
-void escribirColor(int R, int G, int B, int columna){
+void escribirColor(float R, float G, float B, int columna){
 
 	// Escribimos el color del píxel.
-	ficheroSalida << R << " " << G << " " << B <<" ";
+	ficheroSalida << (int)R << " " << (int)G << " " << (int)B <<" ";
 	// Se escribe salto de línea al acabar una fila.
 	if(columna-anchura==0){
 		ficheroSalida << "\n";
@@ -275,4 +279,31 @@ void escribirCabecera(){
 	ficheroSalida << "# Escena\n";
 	ficheroSalida << anchura/tamPixel << " " << altura/tamPixel << "\n";
 	ficheroSalida << "255\n";
+}
+
+/*
+ * Calcula la BDRF de Phong en funcion de las caracteristicas del punto intersectado.
+ */
+VectorT phong(Rayo rayoSombra, VectorT normal, VectorT direccionV, Esfera esfera) {
+	//Se obtiene Wr.
+	VectorT Wr = rayoSombra.getDireccion() - (rayoSombra.getDireccion()-normal*
+			(rayoSombra.getDireccion().prodEscalar(normal)))*2;
+	//Se normaliza El vector direccion de la camara.
+	direccionV = direccionV/direccionV.modulo();
+	//Se calcula la parte difusa.
+	VectorT difusa = esfera.getKd()/PI;
+	//Producto entre Direccion y Wr.
+	float prod = direccionV.prodEscalar(Wr);
+	//Se obtiene su valor absoluto.
+	if(prod < 0) {
+		prod = -prod;
+	}
+	//Se obtiene la especular.
+	float especular = (esfera.getKs()*((esfera.getAlpha()+2)/(2*PI)))*pow(
+			prod,esfera.getAlpha());
+	//Se suman ambas partes y se devuelve el resultado.
+	difusa.setValPos(difusa.getValPos(0)+especular,0);
+	difusa.setValPos(difusa.getValPos(1)+especular,1);
+	difusa.setValPos(difusa.getValPos(2)+especular,2);
+	return difusa;
 }
