@@ -8,7 +8,7 @@
 class Esfera {
 	public:
 		Esfera();
-		Esfera(VectorT, float, VectorT);
+		Esfera(VectorT, float, VectorT,int);
 		virtual ~Esfera();
 
 		float getRadio();
@@ -17,6 +17,7 @@ class Esfera {
 		VectorT getKd();
 		float getKs();
 		float getAlpha();
+		int getMaterial();
 
 	private:
 		float radio;
@@ -25,4 +26,5 @@ class Esfera {
 		VectorT Kd;
 		float Ks = 255;
 		float alpha = 10;
+		int material;
 };

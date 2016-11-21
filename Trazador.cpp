@@ -123,26 +123,33 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 		}
 		if(intersecta.getValPos(0) < 0) {
 			sombra = false;
-			//Se obtiene el factor de incidencia de la luz.
-			float cos = dirRSombra.prodEscalar(normal);
-			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
-				cos = 0;
+			if(origen.getMaterial() == DIFUSO) {
+				//Se obtiene el factor de incidencia de la luz.
+				float cos = dirRSombra.prodEscalar(normal);
+				if(cos < 0) {	//Si es menor que 0, se iguala a 0.
+					cos = 0;
+				}
+				//Se obtiene la distancia a la fuente de luz.
+				float distanciaFuente = (fuenteActual.getPunto() - puntoOrigen).modulo();
+				//Se obtiene la potencia de la luz que incide en el punto.
+				float luzIncidente = fuenteActual.getPotencia()
+						/(distanciaFuente*distanciaFuente);
+				//Se calcula como incide la luz mediante la BDRF de Phong.
+				VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen);
+				//Se obtiene la luz total del punto.
+				luzTotal = luzTotal+(p*cos*luzIncidente);
+			} else {
+				break;
 			}
-			//Se obtiene la distancia a la fuente de luz.
-			float distanciaFuente = (fuenteActual.getPunto() - puntoOrigen).modulo();
-			//Se obtiene la potencia de la luz que incide en el punto.
-			float luzIncidente = fuenteActual.getPotencia()
-					/(distanciaFuente*distanciaFuente);
-			//Se calcula como incide la luz mediante la BDRF de Phong.
-			VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen);
-			//Se obtiene la luz total del punto.
-			luzTotal = luzTotal+(p*cos*luzIncidente);
 		}
 		*fuente++;
 	}
 	if(sombra) {
 		escribirColor(0, 0, 0, columna);
 	} else {
+		if(origen.getMaterial() == REFLECTADO) {
+			luzTotal = reflection(ray.getPunto(),normal, puntoOrigen)*0.8;
+		}
 		//Se obtiene el color en el punto intersectado.
 		float R = luzTotal.getValPos(0);
 		float G =  luzTotal.getValPos(1);;
@@ -223,8 +230,9 @@ void leerFichero(){
 			color[0] = stof(strtok(NULL,"*"));
 			color[1] = stof(strtok(NULL,"*"));
 			color[2] = stof(strtok(NULL,"*"));
+			int material = stof(strtok(NULL,"*"));
 			// Creamos la esfera y la introducimos en la lista.
-			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3));
+			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material);
 			objetos.push_back(esfera);
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
@@ -306,4 +314,47 @@ VectorT phong(Rayo rayoSombra, VectorT normal, VectorT direccionV, Esfera esfera
 	difusa.setValPos(difusa.getValPos(1)+especular,1);
 	difusa.setValPos(difusa.getValPos(2)+especular,2);
 	return difusa;
+}
+
+/*
+ * Devuelve el color reflejado.
+ */
+VectorT reflection(VectorT camara, VectorT normal, VectorT punto) {
+	float cos = normal.prodEscalar(camara);
+	VectorT reflejo = camara - normal*cos*2;
+	return objetosIntersectados(Rayo(&punto,&reflejo));
+}
+
+VectorT objetosIntersectados(Rayo ray) {
+	// Definimos la distancia inicial de intersección.
+			float distInterseccion = infinito;
+			// Definimos el objeto más cercano.
+			Esfera esfCercana;
+			// Creamos el iterador para recorrer la lista.
+			list<Esfera>::iterator esfera = objetos.begin();
+			VectorT intersecta;
+			// Recorremos los objetos para saber intersecciones.
+			while(esfera != objetos.end()){
+				Esfera esfActual = *esfera;
+				// Se calcula la distancia de intersección.
+				intersecta = interseccion(ray, esfActual);
+				// Se comprueba si es la esfera más cercana.
+				if(intersecta.getLon() > 0 && intersecta.getValPos(0) > distancia
+						&& intersecta.getValPos(0) < distInterseccion){
+					// comparamos para obtener el objeto con distancia mínima.
+					distInterseccion = intersecta.getValPos(0);
+					// Se guarda el objeto con el que ha intersectado.
+					esfCercana = esfActual;
+				}
+				*esfera++;
+			}
+			if(distInterseccion != infinito){
+				float valores[] = {esfCercana.getKd().getValPos(0),
+						 esfCercana.getKd().getValPos(1),
+						 esfCercana.getKd().getValPos(2)};
+				return VectorT(valores,3);
+			} else{
+				float valores[] = {0,0,0};
+				return VectorT(valores,3);
+			}
 }
