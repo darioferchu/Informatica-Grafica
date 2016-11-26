@@ -74,7 +74,7 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 			*esfera++;
 		}
 		if(distInterseccion != infinito){
-			trazarRayosSombra(ray, distInterseccion, columna,esfCercana);
+			calcularColor(ray, distInterseccion, columna,esfCercana);
 		} else{
 			escribirColor(0,0,0,columna);
 		}
@@ -88,42 +88,78 @@ void trazarRayos(Rayo ray, int rebote, int columna){
 
 
 
-void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera origen) {
+void calcularColor(Rayo ray, float distInterseccion, int columna, Esfera origen) {
+	// Recorremos luces si intersecta.
+	VectorT luz = trazarRayosSombra(ray,origen, distInterseccion, origen.getIor());
+	//Se obtiene el color en el punto intersectado.
+	float R = luz.getValPos(0);
+	float G = luz.getValPos(1);;
+	float B = luz.getValPos(2);;
+	//Si sobrepasa el maximo se iguala a 255.
+	if(R > 255) {
+		R = 255;
+	}
+	if(G > 255) {
+		G = 255;
+	}
+	if(B > 255) {
+		B = 255;
+	}
+	escribirColor(R, G, B, columna);
+}
+
+/*
+ * Calcula el color visible
+ */
+VectorT trazarRayosSombra(Rayo ray, Esfera origen, float distInterseccion, float indiceSig) {
 	//Se calcula el punto con el que se intersecta.
 	VectorT puntoIntersectado = ray.getPunto() +
 			(ray.getDireccion() * distInterseccion);
 	VectorT normal = puntoIntersectado - origen.getCentro();
 	normal = normal / normal.modulo();
 	float bias = 0.01;
+	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
+	float inicial[3] = {0,0,0};
+	VectorT luzTotal = VectorT(inicial,3);
+
+	//Luz reflejada o refractada en el punto.
+	VectorT reLuz;
+	//Si el objeto es reflectante se obtiene el color reflejado.
+	if(origen.getMaterial() == REFLECTANTE) {
+		reLuz = reflection(ray.getDireccion(),normal, puntoOrigen);
+	} else if(origen.getMaterial() == TRANSPARENTE) {
+		//Al ser transparente se usara puntoIntersectado en lugar de puntoOrigen.
+		 reLuz = refraction(ray.getDireccion(), normal,
+				puntoIntersectado,origen, indiceSig);
+	}
 	//Se crea el iterador para recorrer fuentes de luz.
 	list<Fuente>::iterator fuente = fuentesLuz.begin();
 	bool sombra = true;
-	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
-	// Recorremos luces si intersecta.
-	float inicial[3] = {0,0,0};
-	VectorT luzTotal = VectorT(inicial,3);
 	while(fuente != fuentesLuz.end()){
-		Fuente fuenteActual = *fuente;
-		//Se obtiene la direcci�n del rayo sombra.
-		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
-		dirRSombra = dirRSombra / dirRSombra.modulo();
-		Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);
-		list<Esfera>::iterator esfera = objetos.begin();
-		VectorT intersecta;
-		// Recorremos los objetos para saber intersecciones.
-		while(esfera != objetos.end()){
-			Esfera esfActual = *esfera;
-			// Se calcula la distancia de intersección.
-			intersecta = interseccion(rayoSombra, esfActual);
-			// Se comprueba si es la esfera más cercana.
-			if(intersecta.getValPos(0) >= 0){
-				break;
+			Fuente fuenteActual = *fuente;
+			//Se obtiene la direcci�n del rayo sombra.
+			VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
+			dirRSombra = dirRSombra / dirRSombra.modulo();
+			Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);
+			list<Esfera>::iterator esfera = objetos.begin();
+			VectorT intersecta;
+			// Recorremos los objetos para saber intersecciones.
+			while(esfera != objetos.end()){
+				Esfera esfActual = *esfera;
+				// Se calcula la distancia de intersección.
+				intersecta = interseccion(rayoSombra, esfActual);
+				// Se comprueba si es la esfera más cercana.
+				if(intersecta.getValPos(0) >= 0){
+					if(esfActual.getMaterial() == TRANSPARENTE) {
+						intersecta.setValPos(-1,0);
+					} else {
+						break;
+					}
+				}
+				*esfera++;
 			}
-			*esfera++;
-		}
-		if(intersecta.getValPos(0) < 0) {
-			sombra = false;
-			if(origen.getMaterial() == DIFUSO) {
+			if(intersecta.getValPos(0) < 0) {
+				sombra = false;
 				//Se obtiene el factor de incidencia de la luz.
 				float cos = dirRSombra.prodEscalar(normal);
 				if(cos < 0) {	//Si es menor que 0, se iguala a 0.
@@ -134,39 +170,24 @@ void trazarRayosSombra(Rayo ray, float distInterseccion, int columna, Esfera ori
 				//Se obtiene la potencia de la luz que incide en el punto.
 				float luzIncidente = fuenteActual.getPotencia()
 						/(distanciaFuente*distanciaFuente);
-				//Se calcula como incide la luz mediante la BDRF de Phong.
-				VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen);
-				//Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(p*cos*luzIncidente);
-			} else {
-				break;
+				if(origen.getMaterial() == DIFUSO) {
+					//Se calcula como incide la luz mediante la BDRF de Phong.
+					VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen);
+					//Se obtiene la luz total del punto.
+					luzTotal = luzTotal+(p*cos*luzIncidente);
+				} else {
+					//Se obtiene la luz total del punto.
+					luzTotal = luzTotal+(reLuz*cos*luzIncidente);
+				}
 			}
+			*fuente++;
 		}
-		*fuente++;
-	}
-	if(sombra) {
-		escribirColor(0, 0, 0, columna);
-	} else {
-		if(origen.getMaterial() == REFLECTADO) {
-			luzTotal = reflection(ray.getPunto(),normal, puntoOrigen)*0.8;
+		if(sombra) {
+			luzTotal.setValPos(0,0);
+			luzTotal.setValPos(1,0);
+			luzTotal.setValPos(2,0);
 		}
-		//Se obtiene el color en el punto intersectado.
-		float R = luzTotal.getValPos(0);
-		float G =  luzTotal.getValPos(1);;
-		float B =  luzTotal.getValPos(2);;
-		//Si sobrepasa el maximo se iguala a 255.
-		if(R > 255) {
-			R = 255;
-		}
-		if(G > 255) {
-			G = 255;
-		}
-		if(B > 255) {
-			B = 255;
-		}
-
-		escribirColor(R, G, B, columna);
-	}
+		return luzTotal;
 }
 
 
@@ -231,8 +252,14 @@ void leerFichero(){
 			color[1] = stof(strtok(NULL,"*"));
 			color[2] = stof(strtok(NULL,"*"));
 			int material = stof(strtok(NULL,"*"));
+			float ior = 1;
+			if(material == TRANSPARENTE) {
+				//Si es transparente se indica el indice
+				//de refracci�n del material del interior.
+				ior = stof(strtok(NULL,"*"));;
+			}
 			// Creamos la esfera y la introducimos en la lista.
-			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material);
+			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material, ior);
 			objetos.push_back(esfera);
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 
@@ -325,6 +352,26 @@ VectorT reflection(VectorT camara, VectorT normal, VectorT punto) {
 	return objetosIntersectados(Rayo(&punto,&reflejo));
 }
 
+/*
+ * Devuelve el color refractado.
+ */
+VectorT refraction(VectorT direccionRayo, VectorT normal, VectorT punto, Esfera esfera,
+		float nuevoIndice) {
+	float factor = IRefraccion/nuevoIndice;
+	float cos = normal.prodEscalar(direccionRayo);
+	VectorT direccion = (direccionRayo + normal*cos)*factor -
+			normal*(sqrt(1 - factor*factor*(1 - cos*cos)));
+	float aux = IRefraccion;
+	IRefAnterior = IRefraccion;
+	IRefraccion = nuevoIndice;
+	VectorT color = objetosIntersectados(Rayo(&punto,&direccion));
+	IRefraccion = aux;
+	return color;
+}
+
+/*
+ * Busca con que objetos intersecta un rayo y devuelve el RGB del dicho objeto.
+ */
 VectorT objetosIntersectados(Rayo ray) {
 	// Definimos la distancia inicial de intersección.
 			float distInterseccion = infinito;
@@ -333,26 +380,34 @@ VectorT objetosIntersectados(Rayo ray) {
 			// Creamos el iterador para recorrer la lista.
 			list<Esfera>::iterator esfera = objetos.begin();
 			VectorT intersecta;
+			float nuevoIndice = -1;
 			// Recorremos los objetos para saber intersecciones.
 			while(esfera != objetos.end()){
 				Esfera esfActual = *esfera;
 				// Se calcula la distancia de intersección.
 				intersecta = interseccion(ray, esfActual);
 				// Se comprueba si es la esfera más cercana.
-				if(intersecta.getLon() > 0 && intersecta.getValPos(0) > distancia
-						&& intersecta.getValPos(0) < distInterseccion){
+				if(intersecta.getLon() > 0 && intersecta.getValPos(0) < distInterseccion
+						&& intersecta.getValPos(0)>0){
 					// comparamos para obtener el objeto con distancia mínima.
 					distInterseccion = intersecta.getValPos(0);
 					// Se guarda el objeto con el que ha intersectado.
 					esfCercana = esfActual;
+					nuevoIndice = esfActual.getIor();
+				} else if(intersecta.getLon() > 1 &&
+						esfActual.getMaterial() == TRANSPARENTE &&
+						intersecta.getValPos(1) > 0 &&
+						intersecta.getValPos(1) < distInterseccion) {
+					// comparamos para obtener el objeto con distancia mínima.
+					distInterseccion = intersecta.getValPos(1);
+					// Se guarda el objeto con el que ha intersectado.
+					esfCercana = esfActual;
+					nuevoIndice = IRefAnterior;
 				}
 				*esfera++;
 			}
 			if(distInterseccion != infinito){
-				float valores[] = {esfCercana.getKd().getValPos(0),
-						 esfCercana.getKd().getValPos(1),
-						 esfCercana.getKd().getValPos(2)};
-				return VectorT(valores,3);
+				return trazarRayosSombra(ray, esfCercana, distInterseccion, nuevoIndice);
 			} else{
 				float valores[] = {0,0,0};
 				return VectorT(valores,3);

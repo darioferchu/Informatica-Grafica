@@ -7,16 +7,18 @@
 Esfera::Esfera(){
 	radio = 0;
 	material = 0;
+	ior = -1;
 }
 
 /*
  * Constructor de un objeto esfera con centro, radio y coeficiente de difusion.
  */
-Esfera::Esfera(VectorT centro, float radio, VectorT color,int material) {
+Esfera::Esfera(VectorT centro, float radio, VectorT color,int material, float ior) {
 	this->centro = centro;
 	this->radio = radio;
 	Kd = color;
 	this->material = material;
+	this->ior = ior;
 }
 
 /*
@@ -70,4 +72,8 @@ float Esfera::getAlpha() {
 
 int Esfera::getMaterial() {
 	return material;
+}
+
+float Esfera::getIor() {
+	return ior;
 }
