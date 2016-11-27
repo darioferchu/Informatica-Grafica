@@ -1,22 +1,21 @@
-/*
- * Fuente.h
- *
- *  Created on: 26 oct. 2016
- *      Author: Jorge
- */
 
 #include "VectorT.h"
 
+/*
+ * Clase Fuente con construcores, destructor y métodos
+ * para trabajar con ellas.
+ */
 class Fuente {
-public:
-	Fuente();
-	Fuente(VectorT, float);
-	virtual ~Fuente();
+	public:
+		Fuente();		// Constructor sin parámetros.
+		Fuente(VectorT, float);	// Constructor con parámetros.
+		virtual ~Fuente();	// Destructor.
 
-	VectorT getPunto();
-	float getPotencia();
+		// Métodos getter.
+		VectorT getPunto();
+		float getPotencia();
 
-private:
-	VectorT punto;
-	float potencia;
+	private:
+		VectorT punto;		// Punto de la fuente.
+		float potencia;		// Potencia de la fuente.
 };

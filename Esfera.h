@@ -7,10 +7,11 @@
  */
 class Esfera {
 	public:
-		Esfera();
-		Esfera(VectorT, float, VectorT,int, float);
-		virtual ~Esfera();
+		Esfera();	// Constructor sin parámetros.
+		Esfera(VectorT, float, VectorT,int, float);	// Constructor con parámetros.
+		virtual ~Esfera();	// Destructor.
 
+		// Métodos getter.
 		float getRadio();
 		VectorT getCentro();
 		VectorT getColor();
@@ -21,12 +22,13 @@ class Esfera {
 		float getIor();
 
 	private:
-		float radio;
-		VectorT centro;
-		VectorT color;
+		float radio;	// Radio de la esfera.
+		VectorT centro;	// Centro de la esfera.
+		VectorT color;	// Color de la esfera.
+		// Valores para la BRDF.
 		VectorT Kd;
 		float Ks = 255;
 		float alpha = 10;
-		int material;
-		float ior;
+		int material;	// Material de la esfera.
+		float ior;	// Coeficiente de refracción.
 };

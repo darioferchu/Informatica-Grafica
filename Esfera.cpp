@@ -13,7 +13,7 @@ Esfera::Esfera(){
 /*
  * Constructor de un objeto esfera con centro, radio y coeficiente de difusion.
  */
-Esfera::Esfera(VectorT centro, float radio, VectorT color,int material, float ior) {
+Esfera::Esfera(VectorT centro, float radio, VectorT color, int material, float ior) {
 	this->centro = centro;
 	this->radio = radio;
 	Kd = color;
@@ -32,6 +32,7 @@ Esfera::~Esfera() {
  * Método que devuelve el radio de la esfera.
  */
 float Esfera::getRadio() {
+
 	return radio;
 }
 
@@ -39,6 +40,7 @@ float Esfera::getRadio() {
  * Método que devuelve el centro de la esfera.
  */
 VectorT Esfera::getCentro() {
+
 	return centro;
 }
 
@@ -46,6 +48,7 @@ VectorT Esfera::getCentro() {
  * Método que devuelve el color de la esfera.
  */
 VectorT Esfera::getColor() {
+
 	return color;
 }
 
@@ -53,6 +56,7 @@ VectorT Esfera::getColor() {
  * Devuelve el coeficiente difuso.
  */
 VectorT Esfera::getKd() {
+
 	return Kd;
 }
 
@@ -60,6 +64,7 @@ VectorT Esfera::getKd() {
  * Devuelve el coeficiente especular.
  */
 float Esfera::getKs() {
+
 	return Ks;
 }
 
@@ -67,13 +72,22 @@ float Esfera::getKs() {
  * Devuelve el valor alpha.
  */
 float Esfera::getAlpha() {
+
 	return alpha;
 }
 
+/*
+ * Método que devuelve el material de la esfera.
+ */
 int Esfera::getMaterial() {
+
 	return material;
 }
 
+/*
+ * Método que devuelve el coeficiente de refracción de la esfera.
+ */
 float Esfera::getIor() {
+
 	return ior;
 }

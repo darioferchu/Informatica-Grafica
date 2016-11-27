@@ -27,6 +27,7 @@ Fuente::~Fuente() {
  * Método que devuelve la potencia de la fuente.
  */
 float Fuente::getPotencia() {
+
 	return potencia;
 }
 
@@ -34,5 +35,6 @@ float Fuente::getPotencia() {
  * Método que devuelve el punto de la fuente.
  */
 VectorT Fuente::getPunto() {
+
 	return punto;
 }

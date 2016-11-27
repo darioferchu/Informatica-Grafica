@@ -7,21 +7,22 @@
  */
 class Matriz {
 	public:
-		Matriz();
-		Matriz(VectorT[],int);
-		~Matriz();
+		Matriz();		// Constructor sin parámetros.
+		Matriz(VectorT[],int);	// Constructor con parámetros.
+		~Matriz();	// Destructor.
 
-		Matriz mult(Matriz);
-		Matriz trasponer();
+		Matriz mult(Matriz);	// Método para multiplicar dos matrices.
+		Matriz trasponer();		// Método para transponer una matriz.
 
+		// Métodos getter.
 		int getNumFilas();
 		int getNumColumnas();
 		VectorT getFila(int);
 
 	private:
-		int tamFilas;
-		int tamColumnas;
-		VectorT *matriz;
+		int tamFilas;	// Número de filas.
+		int tamColumnas;	// Número de columnas.
+		VectorT *matriz;	// Puntero a la matriz.
 };
 
 /*

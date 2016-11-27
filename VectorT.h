@@ -7,21 +7,22 @@
  */
 class VectorT {
 	public:
-		VectorT();
-		VectorT(float[], int);
-		~VectorT();
+		VectorT();	// Constructor sin parámetros.
+		VectorT(float[], int);	// Constructor con parámetros.
+		~VectorT();	// Destructor.
 
-		VectorT prodVectorial(VectorT);
-		float prodEscalar(VectorT);
-		float modulo();
+		VectorT prodVectorial(VectorT);		// Método para el productor vectorial.
+		float prodEscalar(VectorT);		// Método para el producto escalar.
+		float modulo();		// Método para el modulo.
 
+		// Métodos getter.
 		float getValPos(int);
 		void setValPos(float,int);
 		int getLon();
 
 	private:
-		int lon;
-		float *vector;
+		int lon;	// Número de elementos del vector.
+		float *vector;	// Puntero al vector.
 };
 
 /*

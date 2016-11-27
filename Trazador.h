@@ -20,17 +20,17 @@ enum {DIFUSO = 0, REFLECTANTE = 1, TRANSPARENTE = 2};
 /*
  * Variables globales.
  */
-float camara[] = {0.0, 0.0, 0.0};
+float camara[] = {0.0, 0.0, 0.0};		// Posición de la cámara.
 float esferaCoor[] = {255.0, 255.0, 100.0};
-float anchura = 0.0;
-float altura = 0.0;
-float distancia = 0.0;
-float tamPixel = 0.0;
+float anchura = 0.0;	// Anchura del plano.
+float altura = 0.0;		// Altura del plano.
+float distancia = 0.0;	// Distancia entre el observador y el plano.
+float tamPixel = 0.0;	// Tamño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
-ofstream ficheroSalida;
-list<Esfera> objetos;
-list<Fuente> fuentesLuz;
+ofstream ficheroSalida;	// Fichero de salida.
+list<Esfera> objetos;	// Lista de objetos de la escena.
+list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
 
 /*
  * Métodos del trazador.
