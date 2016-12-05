@@ -36,15 +36,14 @@ list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
  * Métodos del trazador.
  */
 void trazador();
-void trazarRayos(Rayo, int, int);
-void calcularColor(Rayo, float, int, Esfera);
+void trazarRayos(Rayo, int, float&, float&, float&);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
 void escribirColor(float,float,float, int);
 void escribirCabecera();
 VectorT phong(Rayo, VectorT, VectorT, Esfera);
-VectorT reflection(VectorT , VectorT, VectorT);
-VectorT refraction(VectorT, VectorT, VectorT, Esfera,float);
+void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
+void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
-VectorT trazarRayosSombra(Rayo, Esfera, float, float);
+VectorT trazarRayosSombra(Rayo, int, Esfera, float, float);
