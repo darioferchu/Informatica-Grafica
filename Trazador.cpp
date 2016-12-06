@@ -91,8 +91,35 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 		}
 
 		if(distInterseccion != infinito){	// Si ha intersecado se calcula color.
-			VectorT luz = trazarRayosSombra(ray, rebote, esfCercana,
-					distInterseccion, nuevoIndice);		// Se trazan rayos de sombra.
+			//Se calcula el punto con el que se intersecta.
+			VectorT puntoIntersectado = ray.getPunto() +
+					(ray.getDireccion() * distInterseccion);
+			VectorT normal = puntoIntersectado - esfCercana.getCentro(); // Se calcula la normal al punto.
+			normal = normal / normal.modulo();	// Se normaliza.
+			// Se modifica el punto de intersecci�n por errores de precisi�n.
+			float bias = 0.01;
+			VectorT puntoOrigen = puntoIntersectado + (normal*bias);
+			VectorT luz;
+			//Si el objeto es reflectante se obtiene el color reflejado.
+			if(esfCercana.getMaterial() == REFLECTANTE) {
+				reflection(ray.getDireccion(), rebote,normal, puntoOrigen, R, G, B);
+				float RGB[3] = {R, G, B};
+				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
+				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+			} else if(esfCercana.getMaterial() == TRANSPARENTE) {
+				//Al ser transparente se usara puntoIntersectado en lugar de puntoOrigen.
+				refraction(ray.getDireccion(), rebote, normal,
+						puntoIntersectado,esfCercana, nuevoIndice, R, G, B);
+				float RGB[3] = {R, G, B};
+				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
+				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+			} else {
+				//Si es phong o lambertiana no se calcula ningun color inicial(sera el de la
+				//propia esfera).
+				float RGB[3] = {0, 0, 0};
+				VectorT color = VectorT(RGB, 3);
+				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+			}
 			R = luz.getValPos(0);
 			G = luz.getValPos(1);
 			B = luz.getValPos(2);
@@ -123,50 +150,22 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 /*
  * Método que traza rayos de sombra y calcula el color.
  */
-VectorT trazarRayosSombra(Rayo ray, int rebote, Esfera origen, float distInterseccion,
-		float indiceSig) {
-
-	float R = 0, G = 0, B = 0;
-	// Se calcula el punto con el que se intersecta.
-	VectorT puntoIntersectado = ray.getPunto() +
-			(ray.getDireccion() * distInterseccion);
-	VectorT normal = puntoIntersectado - origen.getCentro(); // Se calcula la normal al punto.
-	normal = normal / normal.modulo();	// Se normaliza.
-
-	// Se modifica el punto de intersección por errores de precisión.
-	float bias = 0.01;
-	VectorT puntoOrigen = puntoIntersectado + (normal*bias);
+VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, VectorT color,
+		Esfera esfIntersectada) {
 
 	// Se declara la luz total inicial.
-	float inicial[3] = {0,0,0}; VectorT luzTotal = VectorT(inicial,3);
-
-	//Si el objeto es reflectante se obtiene el color reflejado.
-	if(origen.getMaterial() == REFLECTANTE) {
-		reflection(ray.getDireccion(), rebote,normal, puntoOrigen, R, G, B);
-		inicial[0] = R;
-		inicial[1] = G;
-		inicial[2] = B;
-	} else if(origen.getMaterial() == TRANSPARENTE) {
-		//Al ser transparente se usara puntoIntersectado en lugar de puntoOrigen.
-		refraction(ray.getDireccion(), rebote, normal,
-				puntoIntersectado,origen, indiceSig, R, G, B);
-		inicial[0] = R;
-		inicial[1] = G;
-		inicial[2] = B;
-	}
-	//Luz reflejada o refractada en el punto.
-	VectorT reLuz = VectorT(inicial,3);
+	float inicial[3] = {0,0,0};
+	VectorT luzTotal = VectorT(inicial,3);
 
 	//Se crea el iterador para recorrer fuentes de luz.
 	list<Fuente>::iterator fuente = fuentesLuz.begin();
-	bool sombra = true;	// Booleano para saber si da sombra.
 
 	while(fuente != fuentesLuz.end()){	// Se recorren las fuentes.
 		Fuente fuenteActual = *fuente;	// Se obtiene la primera fuente.
 		//Se obtiene la dirección del rayo sombra.
-		VectorT dirRSombra = fuenteActual.getPunto() - puntoOrigen;
+		VectorT dirRSombra = fuenteActual.getPunto() - puntoIntersectado;
 		dirRSombra = dirRSombra / dirRSombra.modulo();	// Se normaliza.
-		Rayo rayoSombra = Rayo(&puntoOrigen, &dirRSombra);	// Se crea el rayo.
+		Rayo rayoSombra = Rayo(&puntoIntersectado, &dirRSombra);	// Se crea el rayo.
 
 		// Iterador para recorres los objetos de la escena.
 		list<Esfera>::iterator esfera = objetos.begin();
@@ -189,32 +188,28 @@ VectorT trazarRayosSombra(Rayo ray, int rebote, Esfera origen, float distInterse
 		}
 
 		if(intersecta.getValPos(0) < 0) {	// Se comprueba si ha intersectado.
-			sombra = false;	// Si no ha intersectado, se marca como que no hay sombra.
 			// Se obtiene el factor de incidencia de la luz.
 			float cos = dirRSombra.prodEscalar(normal);
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
 				cos = 0;
 			}
 			// Se obtiene la distancia a la fuente de luz.
-			float distanciaFuente = (fuenteActual.getPunto() - puntoOrigen).modulo();
+			float distanciaFuente = (fuenteActual.getPunto() - puntoIntersectado).modulo();
 			// Se obtiene la potencia de la luz que incide en el punto.
 			float luzIncidente = fuenteActual.getPotencia()
 					/(distanciaFuente*distanciaFuente);
 
-			if(origen.getMaterial() == PHONG) {	// Si es phong, se calcula la luz.
+			if(esfIntersectada.getMaterial() == PHONG) {	// Si es phong, se calcula la luz.
 				// Se calcula como incide la luz mediante la BDRF de Phong.
-				VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen,true);
-				// Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(p*cos*luzIncidente);
-			} else if(origen.getMaterial() == LAMBERTIANO){	// Si es lambertiana...
+				color = phong(rayoSombra, normal,
+						ray.getPunto()-puntoIntersectado,esfIntersectada,true);
+			} else if(esfIntersectada.getMaterial() == LAMBERTIANO){	// Si es lambertiana...
 				// Se calcula como incide la luz mediante la BDRF de Phong.
-				VectorT p = phong(rayoSombra, normal, ray.getPunto()-puntoOrigen,origen,false);
-				// Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(p*cos*luzIncidente);
-			} else {	// Si es transparente o espejo, se usa la luz calculada.
-				// Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(reLuz*cos*luzIncidente);
+				color = phong(rayoSombra, normal,
+						ray.getPunto()-puntoIntersectado,esfIntersectada,false);
 			}
+			// Se obtiene la luz total del punto.
+			luzTotal = luzTotal+(color*cos*luzIncidente);
 		}
 		*fuente++;		// Se pasa a la siguiente fuente de luz.
 	}

@@ -46,4 +46,4 @@ VectorT phong(Rayo, VectorT, VectorT, Esfera, bool);
 void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
 void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
-VectorT trazarRayosSombra(Rayo, int, Esfera, float, float);
+VectorT trazarRayosSombra(Rayo, VectorT, VectorT, VectorT, Esfera);
