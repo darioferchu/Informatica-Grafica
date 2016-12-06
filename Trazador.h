@@ -15,7 +15,7 @@ using namespace std;
 #define infinito 99999
 #define escena "escena.txt"
 #define PI 3.14159265
-enum {DIFUSO = 0, REFLECTANTE = 1, TRANSPARENTE = 2};
+enum {PHONG = 0, REFLECTANTE = 1, TRANSPARENTE = 2, LAMBERTIANO = 3};
 
 /*
  * Variables globales.
@@ -42,7 +42,7 @@ VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
 void escribirColor(float,float,float, int);
 void escribirCabecera();
-VectorT phong(Rayo, VectorT, VectorT, Esfera);
+VectorT phong(Rayo, VectorT, VectorT, Esfera, bool);
 void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
 void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
