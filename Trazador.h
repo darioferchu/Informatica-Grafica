@@ -25,9 +25,10 @@ float esferaCoor[] = {255.0, 255.0, 100.0};
 float anchura = 0.0;	// Anchura del plano.
 float altura = 0.0;		// Altura del plano.
 float distancia = 0.0;	// Distancia entre el observador y el plano.
-float tamPixel = 0.0;	// Tamño del pixel.
+float tamPixel = 0.0;	// Tamaño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
+int numEscritos = 0;	// Número de pixeles escritos.
 ofstream ficheroSalida;	// Fichero de salida.
 list<Esfera> objetos;	// Lista de objetos de la escena.
 list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
@@ -40,7 +41,7 @@ void trazarRayos(Rayo, int, float&, float&, float&);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
-void escribirColor(float,float,float, int);
+void escribirColor(float,float,float,int);
 void escribirCabecera();
 VectorT phong(Rayo, VectorT, VectorT, Esfera, bool);
 void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);

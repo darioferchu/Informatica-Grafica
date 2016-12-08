@@ -31,6 +31,11 @@ void trazador(){
 	float derecho = camara[0]+anchura/2;
 	float arriba = camara[1]+altura/2;
 	float abajo = camara[1]-altura/2;
+	cout << izquierdo << "\n";
+	cout << derecho << "\n";
+	cout << arriba << "\n";
+	cout << abajo << "\n";
+	cout << distancia << "\n";
 	float R, G, B;
 	// Recorremos anchura y altura del mapa pixeles.
 	for(float i=arriba-tamPixel/2; i>abajo; i=i-tamPixel){
@@ -57,7 +62,7 @@ void trazador(){
  */
 void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 
-	//if(rebote != 5){
+	if(rebote != 5){
 		// Definimos las variables.
 		float distInterseccion = infinito; Esfera esfCercana; VectorT intersecta;
 		// Creamos el iterador para recorrer la lista.
@@ -96,7 +101,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 					(ray.getDireccion() * distInterseccion);
 			VectorT normal = puntoIntersectado - esfCercana.getCentro(); // Se calcula la normal al punto.
 			normal = normal / normal.modulo();	// Se normaliza.
-			// Se modifica el punto de intersección por errores de precisión.
+			// Se modifica el punto de intersecciï¿½n por errores de precisiï¿½n.
 			float bias = 0.01;
 			VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 			VectorT luz;
@@ -114,7 +119,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
 			} else {
-				//Si es phong o lambertiana no se calcula ningun color inicial(sera el de la
+				//Si es phong o lambertiana no se calcula ningun color inicial (sera el de la
 				//propia esfera).
 				float RGB[3] = {0, 0, 0};
 				VectorT color = VectorT(RGB, 3);
@@ -138,12 +143,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			G = 0;
 			B = 0;
 		}
-		// AÃ±adir contribuciÃ³n color.
-		//trazarRayos(ray,rebote+1);
-	/*} else{
-		// Pintar color.
-
-	}*/
+	}
 }
 
 
