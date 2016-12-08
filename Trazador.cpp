@@ -31,12 +31,8 @@ void trazador(){
 	float derecho = camara[0]+anchura/2;
 	float arriba = camara[1]+altura/2;
 	float abajo = camara[1]-altura/2;
-	cout << izquierdo << "\n";
-	cout << derecho << "\n";
-	cout << arriba << "\n";
-	cout << abajo << "\n";
-	cout << distancia << "\n";
 	float R, G, B;
+	VectorT punto = VectorT(camara,3);
 	// Recorremos anchura y altura del mapa pixeles.
 	for(float i=arriba-tamPixel/2; i>abajo; i=i-tamPixel){
 		for(float j=izquierdo+tamPixel/2; j<derecho; j=j+tamPixel){
@@ -45,7 +41,6 @@ void trazador(){
 			direccionRayo[0] = j-camara[0];
 			direccionRayo[1] = i-camara[1];
 			direccionRayo[2] = distancia-camara[2];
-			VectorT punto = VectorT(camara,3);
 			VectorT direccion = VectorT(direccionRayo,3);
 			direccion = direccion / direccion.modulo();	// Normalizamos con el modulo.
 			Rayo ray = Rayo(&punto,&direccion);	// Creamos el rayo.
@@ -272,16 +267,17 @@ void leerFichero(){
 			centro[1] = stof(strtok(NULL,"*"));
 			centro[2] = stof(strtok(NULL,"*"));
 			radio = stof(strtok(NULL,"*"));		// Leemos radio.
-			// Leemos color.
-			color[0] = stof(strtok(NULL,"*"));
-			color[1] = stof(strtok(NULL,"*"));
-			color[2] = stof(strtok(NULL,"*"));
 			int material = stof(strtok(NULL,"*"));	// Leemos material.
 			float ior = 1;	// Declaramos el coeficiente.
 			if(material == TRANSPARENTE) {
 				//Si es transparente se indica el índice
 				//de refracción del material del interior.
 				ior = stof(strtok(NULL,"*"));
+			}  else if(material == PHONG || material == LAMBERTIANO) {
+				// Leemos color.
+				color[0] = stof(strtok(NULL,"*"));
+				color[1] = stof(strtok(NULL,"*"));
+				color[2] = stof(strtok(NULL,"*"));
 			}
 			// Creamos la esfera y la introducimos en la lista.
 			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
@@ -385,6 +381,7 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 	float cos = normal.prodEscalar(direccionRayo);
 	VectorT direccion = (direccionRayo + normal*cos)*factor -
 			normal*(sqrt(1 - factor*factor*(1 - cos*cos)));
+	direccion = direccion/direccion.modulo();
 	float aux = IRefraccion;
 	IRefAnterior = IRefraccion;
 	IRefraccion = nuevoIndice;
