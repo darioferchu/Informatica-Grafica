@@ -165,13 +165,15 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 		// Iterador para recorres los objetos de la escena.
 		list<Esfera>::iterator esfera = objetos.begin();
 		VectorT intersecta;
+		// Se obtiene la distancia a la fuente de luz.
+		float distanciaFuente = (fuenteActual.getPunto() - puntoIntersectado).modulo();
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;	// Obtenemos la esfera actual.
 			// Se calcula la distancia de intersección.
 			intersecta = interseccion(rayoSombra, esfActual);
 			// Se comprueba si está entre el foco y la esfera.
-			if(intersecta.getValPos(0) >= 0){
+			if(intersecta.getValPos(0) >= 0 && intersecta.getValPos(0)<distanciaFuente){
 				// Si es transparente, la luz pasara.
 				if(esfActual.getMaterial() == TRANSPARENTE) {
 					intersecta.setValPos(-1,0);	// Si es transparente, se indica.
@@ -188,8 +190,6 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
 				cos = 0;
 			}
-			// Se obtiene la distancia a la fuente de luz.
-			float distanciaFuente = (fuenteActual.getPunto() - puntoIntersectado).modulo();
 			// Se obtiene la potencia de la luz que incide en el punto.
 			float luzIncidente = fuenteActual.getPotencia()
 					/(distanciaFuente*distanciaFuente);
