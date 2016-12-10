@@ -20,6 +20,9 @@ class Esfera {
 		float getAlpha();
 		int getMaterial();
 		float getIor();
+		// Métodos setter.
+		void setKs(float);
+		void setAlpha(float);
 
 	private:
 		float radio;	// Radio de la esfera.
@@ -27,8 +30,8 @@ class Esfera {
 		VectorT color;	// Color de la esfera.
 		// Valores para la BRDF.
 		VectorT Kd;
-		float Ks = 255;
-		float alpha = 10;
+		float Ks;
+		float alpha;
 		int material;	// Material de la esfera.
 		float ior;	// Coeficiente de refracción.
 };

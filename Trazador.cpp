@@ -262,7 +262,7 @@ void leerFichero(){
 		if(objeto=="Esfera"){	// Si es esfera...
 			// Declaramos variables.
 			float *centro = new float[3]; float *color = new float[3];
-			float radio;
+			float radio, ks, alpha;
 			// Leemos centro.
 			centro[0] = stof(strtok(NULL,"*"));
 			centro[1] = stof(strtok(NULL,"*"));
@@ -274,14 +274,33 @@ void leerFichero(){
 				//Si es transparente se indica el índice
 				//de refracción del material del interior.
 				ior = stof(strtok(NULL,"*"));
-			}  else if(material == PHONG || material == LAMBERTIANO) {
+				// Creamos la esfera y la introducimos en la lista.
+				Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
+				objetos.push_back(esfera);
+			}  else if(material == PHONG){
 				// Leemos color.
 				color[0] = stof(strtok(NULL,"*"));
 				color[1] = stof(strtok(NULL,"*"));
 				color[2] = stof(strtok(NULL,"*"));
+				ks = stof(strtok(NULL,"*"));
+				alpha = stof(strtok(NULL,"*"));
+				// Creamos la esfera y la introducimos en la lista.
+				Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
+				esfera.setAlpha(alpha);
+				esfera.setKs(ks);
+				objetos.push_back(esfera);
+			} else if(material == LAMBERTIANO) {
+				// Leemos color.
+				color[0] = stof(strtok(NULL,"*"));
+				color[1] = stof(strtok(NULL,"*"));
+				color[2] = stof(strtok(NULL,"*"));
+				// Creamos la esfera y la introducimos en la lista.
+				Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
+				objetos.push_back(esfera);
 			}
 			// Creamos la esfera y la introducimos en la lista.
 			Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
+
 			objetos.push_back(esfera);
 		} else if(objeto=="Triangulo"){	// Si es triángulo...
 

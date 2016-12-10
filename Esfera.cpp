@@ -91,3 +91,19 @@ float Esfera::getIor() {
 
 	return ior;
 }
+
+/*
+ * Método que fija el coeficiente especular.
+ */
+void Esfera::setKs(float ks) {
+
+	this->Ks = ks;
+}
+
+/*
+ * Método que fija el coeficiente alpha.
+ */
+void Esfera::setAlpha(float alpha) {
+
+	this->alpha = alpha;
+}
