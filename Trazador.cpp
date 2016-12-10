@@ -97,7 +97,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			VectorT normal = puntoIntersectado - esfCercana.getCentro(); // Se calcula la normal al punto.
 			normal = normal / normal.modulo();	// Se normaliza.
 			// Se modifica el punto de intersecci�n por errores de precisi�n.
-			float bias = 0.01;
+			float bias = 0.0001;
 			VectorT puntoOrigen = puntoIntersectado + (normal*bias);
 			VectorT luz;
 			//Si el objeto es reflectante se obtiene el color reflejado.
@@ -167,6 +167,7 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 		VectorT intersecta;
 		// Se obtiene la distancia a la fuente de luz.
 		float distanciaFuente = (fuenteActual.getPunto() - puntoIntersectado).modulo();
+		bool sombra = false; //Indica si el punto es alcanzado por una fuente de luz.
 		// Recorremos los objetos para saber intersecciones.
 		while(esfera != objetos.end()){
 			Esfera esfActual = *esfera;	// Obtenemos la esfera actual.
@@ -175,16 +176,16 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 			// Se comprueba si está entre el foco y la esfera.
 			if(intersecta.getValPos(0) >= 0 && intersecta.getValPos(0)<distanciaFuente){
 				// Si es transparente, la luz pasara.
-				if(esfActual.getMaterial() == TRANSPARENTE) {
-					intersecta.setValPos(-1,0);	// Si es transparente, se indica.
-				} else {
-					break;		// Si está entre el foco y la esfera, hay sombra.
+				if(esfActual.getMaterial() != TRANSPARENTE) {
+					// Si no es transparente, se indica.
+					sombra = true;
+					break;
 				}
 			}
 			*esfera++;	// Se pasa a la siguiente esfera.
 		}
 
-		if(intersecta.getValPos(0) < 0) {	// Se comprueba si ha intersectado.
+		if(!sombra) {	// Se comprueba si ha intersectado.
 			// Se obtiene el factor de incidencia de la luz.
 			float cos = dirRSombra.prodEscalar(normal);
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
