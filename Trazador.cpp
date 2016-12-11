@@ -116,7 +116,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 							puntoOrigen,esfCercana, nuevoIndice, R, G, B);
 				} else {
 					refraction(ray.getDireccion(), rebote, normal,
-							puntoIntersectado,esfCercana, nuevoIndice, R, G, B);
+							puntoIntersectado-(normal*bias),esfCercana, nuevoIndice, R, G, B);
 				}
 				float RGB[3] = {R, G, B};
 				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
@@ -409,17 +409,22 @@ void reflection(VectorT camara, int rebote, VectorT normal, VectorT punto
  */
 void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto,
 		Esfera esfera, float nuevoIndice, float &R, float &G, float &B) {
-	float factor = IRefraccion/nuevoIndice;
+	float factor;
+	float aux = IRefraccion;
 	float cos = normal.prodEscalar(direccionRayo);
 	if(cos < 0) {
 		cos = -cos;
+		factor = IRefraccion/nuevoIndice;
+		IRefAnterior = IRefraccion;
+		IRefraccion = nuevoIndice;
+	} else {		//Sale de la esfera.
+		factor = IRefAnterior/IRefraccion;
+		IRefraccion = IRefAnterior;
 	}
+	float c2 = 1 - factor*factor*(1 - cos*cos);
 	VectorT direccion = (direccionRayo + normal*cos)*factor -
-			normal*(sqrt(1 - factor*factor*(1 - cos*cos)));
+			normal*(sqrt(c2));
 	direccion = direccion/direccion.modulo();
-	float aux = IRefraccion;
-	IRefAnterior = IRefraccion;
-	IRefraccion = nuevoIndice;
 	trazarRayos(Rayo(&punto,&direccion), rebote+1, R, G, B);
 	IRefraccion = aux;
 }
