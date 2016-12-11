@@ -63,7 +63,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 		// Creamos el iterador para recorrer la lista.
 		list<Esfera>::iterator esfera = objetos.begin();
 		float nuevoIndice = -1;
-
+		bool salida = false;
 		while(esfera != objetos.end()){	// Recorremos los objetos para saber intersecciones.
 			Esfera esfActual = *esfera;	// Sacamos la esfera actual.
 			// Se calcula la distancia de intersección.
@@ -77,7 +77,8 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfActual;
 				nuevoIndice = esfActual.getIor();
-			} else if(intersecta.getLon() > 1 &&		// Se mira si se está saliendo de una transparente.
+			} else if(intersecta.getLon() > 1 &&
+					// Se mira si se está saliendo de una transparente.
 					esfActual.getMaterial() == TRANSPARENTE &&
 					intersecta.getValPos(1) > 0 &&
 					intersecta.getValPos(1) < distInterseccion) {
@@ -86,6 +87,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfActual;
 				nuevoIndice = IRefAnterior;	// El índice de refracción es el anterior.
+				salida = true;
 			}
 			*esfera++;	// Se pasa a la siguiente esfera de la lista.
 		}
@@ -94,7 +96,8 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			//Se calcula el punto con el que se intersecta.
 			VectorT puntoIntersectado = ray.getPunto() +
 					(ray.getDireccion() * distInterseccion);
-			VectorT normal = puntoIntersectado - esfCercana.getCentro(); // Se calcula la normal al punto.
+			// Se calcula la normal al punto.
+			VectorT normal = puntoIntersectado - esfCercana.getCentro();
 			normal = normal / normal.modulo();	// Se normaliza.
 			// Se modifica el punto de intersecci�n por errores de precisi�n.
 			float bias = 0.0001;
@@ -108,11 +111,20 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
 			} else if(esfCercana.getMaterial() == TRANSPARENTE) {
 				//Al ser transparente se usara puntoIntersectado en lugar de puntoOrigen.
-				refraction(ray.getDireccion(), rebote, normal,
-						puntoIntersectado,esfCercana, nuevoIndice, R, G, B);
+				if(salida) {
+					refraction(ray.getDireccion(), rebote, normal,
+							puntoOrigen,esfCercana, nuevoIndice, R, G, B);
+				} else {
+					refraction(ray.getDireccion(), rebote, normal,
+							puntoIntersectado,esfCercana, nuevoIndice, R, G, B);
+				}
 				float RGB[3] = {R, G, B};
 				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
-				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+				if(rebote==0) {
+					luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+				} else {
+					luz = color;
+				}
 			} else {
 				//Si es phong o lambertiana no se calcula ningun color inicial (sera el de la
 				//propia esfera).
@@ -399,6 +411,9 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 		Esfera esfera, float nuevoIndice, float &R, float &G, float &B) {
 	float factor = IRefraccion/nuevoIndice;
 	float cos = normal.prodEscalar(direccionRayo);
+	if(cos < 0) {
+		cos = -cos;
+	}
 	VectorT direccion = (direccionRayo + normal*cos)*factor -
 			normal*(sqrt(1 - factor*factor*(1 - cos*cos)));
 	direccion = direccion/direccion.modulo();
