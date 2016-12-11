@@ -198,6 +198,11 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 		}
 
 		if(!sombra) {	// Se comprueba si ha intersectado.
+			if(esfIntersectada.getMaterial() == TRANSPARENTE ||
+					esfIntersectada.getMaterial() == REFLECTANTE) {
+				luzTotal = color;
+				break;
+			}
 			// Se obtiene el factor de incidencia de la luz.
 			float cos = dirRSombra.prodEscalar(normal);
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
@@ -211,13 +216,15 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 				// Se calcula como incide la luz mediante la BDRF de Phong.
 				color = phong(rayoSombra, normal,
 						ray.getPunto()-puntoIntersectado,esfIntersectada,true);
+				// Se obtiene la luz total del punto.
+				luzTotal = luzTotal+(color*cos*luzIncidente);
 			} else if(esfIntersectada.getMaterial() == LAMBERTIANO){	// Si es lambertiana...
 				// Se calcula como incide la luz mediante la BDRF de Phong.
 				color = phong(rayoSombra, normal,
 						ray.getPunto()-puntoIntersectado,esfIntersectada,false);
+				// Se obtiene la luz total del punto.
+				luzTotal = luzTotal+(color*cos*luzIncidente);
 			}
-			// Se obtiene la luz total del punto.
-			luzTotal = luzTotal+(color*cos*luzIncidente);
 		}
 		*fuente++;		// Se pasa a la siguiente fuente de luz.
 	}
@@ -422,9 +429,14 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 		IRefraccion = IRefAnterior;
 	}
 	float c2 = 1 - factor*factor*(1 - cos*cos);
-	VectorT direccion = (direccionRayo + normal*cos)*factor -
-			normal*(sqrt(c2));
-	direccion = direccion/direccion.modulo();
+	VectorT direccion;
+	if(c2 < 0) {
+		direccion = direccionRayo;
+	} else {
+		direccion = (direccionRayo + normal*cos)*factor -
+				normal*(sqrt(c2));
+		direccion = direccion/direccion.modulo();
+	}
 	trazarRayos(Rayo(&punto,&direccion), rebote+1, R, G, B);
 	IRefraccion = aux;
 }

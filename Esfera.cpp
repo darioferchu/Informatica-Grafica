@@ -8,6 +8,8 @@ Esfera::Esfera(){
 	radio = 0;
 	material = 0;
 	ior = -1;
+	alpha = 0;
+	Ks = 0;
 }
 
 /*
@@ -19,6 +21,8 @@ Esfera::Esfera(VectorT centro, float radio, VectorT color, int material, float i
 	Kd = color;
 	this->material = material;
 	this->ior = ior;
+	alpha = 0;
+	Ks = 0;
 }
 
 /*
