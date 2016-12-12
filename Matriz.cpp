@@ -1,7 +1,5 @@
 
 #include "Matriz.h"
-using namespace std;
-#include <iostream>
 
 /*
  * Constructor de un objeto Matríz vacío.
