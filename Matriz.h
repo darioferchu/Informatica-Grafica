@@ -13,6 +13,7 @@ class Matriz {
 
 		Matriz mult(Matriz);	// Método para multiplicar dos matrices.
 		Matriz trasponer();		// Método para transponer una matriz.
+		Matriz inversa();	// Método para calcular la inversa de una matríz.
 
 		// Métodos getter.
 		int getNumFilas();
@@ -23,6 +24,15 @@ class Matriz {
 		int tamFilas;	// Número de filas.
 		int tamColumnas;	// Número de columnas.
 		VectorT *matriz;	// Puntero a la matriz.
+
+		// Variables para el calculo de la inversa.
+		VectorT *inver;
+		float b[4][4];
+
+		// Métodos para el cálculo de la inversa.
+		void fila_pivote(int,float);
+		void col_pivote(int,float);
+		void otros(int,int,float);
 };
 
 /*

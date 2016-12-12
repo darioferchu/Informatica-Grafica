@@ -1,5 +1,7 @@
 
 #include "Matriz.h"
+using namespace std;
+#include <iostream>
 
 /*
  * Constructor de un objeto Matríz vacío.
@@ -8,6 +10,7 @@ Matriz::Matriz() {
 	tamColumnas = 0;
 	tamFilas = 0;
 	matriz = NULL;
+	inver = NULL;
 }
 
 /*
@@ -18,6 +21,7 @@ Matriz::Matriz(VectorT vectores[],int vects) {
 	tamFilas = vects;
 	tamColumnas = vectores[0].getLon();
 	matriz = vectores;
+	inver = NULL;
 }
 
 /*
@@ -138,4 +142,71 @@ VectorT Matriz::getFila(int fila){
 int Matriz::getNumColumnas() {
 
 	return tamColumnas;
+}
+
+/*
+ * Función que calcula la matriz inversa.
+ */
+Matriz Matriz::inversa() {
+
+	int i = 0; int j = 0; float pivote = 0;	// Variables para el calculo.
+	inver = new VectorT[tamFilas];	// Matriz inversa final.
+	for(int i=0; i<tamFilas; i++){		// Se rellena la matriz inversa con los valores iniciales.
+		float *vector = new float [tamFilas];
+		for(int j=0; j<tamFilas; j++){
+			vector[j] = matriz[i].getValPos(j);
+		}
+		inver[i] = VectorT(vector,tamColumnas);
+	}
+
+	for(i=0; i<tamFilas; i++){		// Se iteran todos los elementos.
+		j=i;
+		pivote=inver[i].getValPos(j);	// Se obtiene el pivote.
+		// Se calcula la inversa.
+		b[i][j]=1/pivote;
+		fila_pivote(i,pivote);
+		col_pivote(j,pivote);
+		otros(i,j,pivote);
+		for(int k=0; k<tamFilas; k++){	// Se meten los valores finales en la inversa.
+			for(int l=0; l<tamFilas; l++){
+				inver[k].setValPos(b[k][l],l);
+			}
+		}
+	}
+
+	return Matriz(inver,tamFilas);		// Se devuelve la matriz inversa.
+}
+
+/*
+ * Función que itera en las filas.
+ */
+void Matriz::fila_pivote(int i, float pivote)
+{
+    int m;
+    for(m=0; m<tamFilas; m++)
+        if(m != i)
+            b[i][m]=inver[i].getValPos(m)/pivote;
+}
+
+/*
+ * Función que itera en las columnas.
+ */
+void Matriz::col_pivote(int j, float pivote)
+{
+    int m;
+    for(m=0; m<tamFilas; m++)
+        if(m != j)
+            b[m][j]=-inver[m].getValPos(j)/pivote;
+}
+
+/*
+ * Función que itera en el resto de elementos.
+ */
+void Matriz::otros(int i, int j, float pivote)
+{
+    int x,y;
+    for(x=0 ;x<tamFilas; x++)
+        for(y=0; y<tamFilas; y++)
+            if(x!=i && y!=j)
+    			b[x][y]=inver[x].getValPos(y)-(inver[i].getValPos(y)*inver[x].getValPos(j))/pivote;
 }
