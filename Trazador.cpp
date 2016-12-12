@@ -107,8 +107,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			if(esfCercana.getMaterial() == REFLECTANTE) {
 				reflection(ray.getDireccion(), rebote,normal, puntoOrigen, R, G, B);
 				float RGB[3] = {R, G, B};
-				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
-				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else if(esfCercana.getMaterial() == TRANSPARENTE) {
 				//Al ser transparente se usara puntoIntersectado en lugar de puntoOrigen.
 				if(salida) {
@@ -119,18 +118,9 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 							puntoIntersectado-(normal*bias),esfCercana, nuevoIndice, R, G, B);
 				}
 				float RGB[3] = {R, G, B};
-				VectorT color = VectorT(RGB, 3);	//Se inicializa color.
-				if(rebote==0) {
-					luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
-				} else {
-					luz = color;
-				}
+				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
-				//Si es phong o lambertiana no se calcula ningun color inicial (sera el de la
-				//propia esfera).
-				float RGB[3] = {0, 0, 0};
-				VectorT color = VectorT(RGB, 3);
-				luz = trazarRayosSombra(ray, puntoOrigen, normal, color, esfCercana);
+				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
 			}
 			R = luz.getValPos(0);
 			G = luz.getValPos(1);
@@ -157,7 +147,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 /*
  * Método que traza rayos de sombra y calcula el color.
  */
-VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, VectorT color,
+VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal,
 		Esfera esfIntersectada) {
 
 	// Se declara la luz total inicial.
@@ -198,11 +188,6 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 		}
 
 		if(!sombra) {	// Se comprueba si ha intersectado.
-			if(esfIntersectada.getMaterial() == TRANSPARENTE ||
-					esfIntersectada.getMaterial() == REFLECTANTE) {
-				luzTotal = color;
-				break;
-			}
 			// Se obtiene el factor de incidencia de la luz.
 			float cos = dirRSombra.prodEscalar(normal);
 			if(cos < 0) {	//Si es menor que 0, se iguala a 0.
@@ -211,20 +196,18 @@ VectorT trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal, V
 			// Se obtiene la potencia de la luz que incide en el punto.
 			float luzIncidente = fuenteActual.getPotencia()
 					/(distanciaFuente*distanciaFuente);
-
+			VectorT p;
 			if(esfIntersectada.getMaterial() == PHONG) {	// Si es phong, se calcula la luz.
 				// Se calcula como incide la luz mediante la BDRF de Phong.
-				color = phong(rayoSombra, normal,
-						ray.getPunto()-puntoIntersectado,esfIntersectada,true);
-				// Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(color*cos*luzIncidente);
+				p = phong(rayoSombra, normal,
+							ray.getPunto()-puntoIntersectado,esfIntersectada,true);
 			} else if(esfIntersectada.getMaterial() == LAMBERTIANO){	// Si es lambertiana...
 				// Se calcula como incide la luz mediante la BDRF de Phong.
-				color = phong(rayoSombra, normal,
-						ray.getPunto()-puntoIntersectado,esfIntersectada,false);
-				// Se obtiene la luz total del punto.
-				luzTotal = luzTotal+(color*cos*luzIncidente);
+				p = phong(rayoSombra, normal,
+							ray.getPunto()-puntoIntersectado,esfIntersectada,false);
 			}
+			// Se obtiene la luz total del punto.
+			luzTotal = luzTotal+(p*cos*luzIncidente);
 		}
 		*fuente++;		// Se pasa a la siguiente fuente de luz.
 	}
