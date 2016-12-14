@@ -121,6 +121,8 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
+				// Calcular luz indirecta.
+				//luz += indirectLigth();
 			}
 			R = luz.getValPos(0);
 			G = luz.getValPos(1);
@@ -422,4 +424,72 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 	}
 	trazarRayos(Rayo(&punto,&direccion), rebote+1, R, G, B);
 	IRefraccion = aux;
+}
+
+/*
+ * Método que calcula la luz indirecta.
+ */
+VectorT indirectLight(VectorT normal){
+
+	// Declaramos los vectores para el sistema de coordenadas.
+	float vector[3] = {0,0,0};
+	VectorT vectorU = VectorT(vector,3);
+	VectorT vectorV = VectorT(vector,3);
+	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
+	float inicial[3] = {0,0,0};		// Inicializamos el color inicial.
+	VectorT luzIndirecta = VectorT(inicial,3);
+	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
+		srand(time(NULL));		// Inicializamos la semilla.
+		float random1 = rand();		// Obtenemos el primer número aleatorio.
+		float random2 = rand();		// Obtenemos el segundo número aleatorio.
+		// Calculamos los valores de theta y phi.
+		float theta = pow(cos(sqrt(1-random1)),-1);
+		float phi = 2*PI*random2;
+		Matriz coordenadas = uniformeSemiesfera(theta,phi);	// Obtenemos la coordenada random.
+		Matriz coordenadasMundo = sistema.mult(coordenadas);		// Pasamos a coordenadas del mundo.
+		// Lanzamos el rayo para calcular el color.
+		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
+		// Metemos en luz total la aportación captada por el rayo.
+		luzIndirecta += luzDevuelta;
+	}
+	// Calculamos la media de la contribución de cada color.
+	luzIndirecta = luzIndirecta / rayosIndirecta*2*PI;
+	return luzIndirecta;		// Devolvemos la luz indirecta.
+}
+
+/*
+ * Función que calcula el sistema de coordenadas locales.
+ */
+Matriz sistemaCoordenadas(VectorT normal){
+
+	// Inicializamos el vector con uno perpendicular a la normal.
+	float vector[3] = {normal.getValPos(0),-normal.getValPos(1),0};
+	VectorT vectorU = VectorT(vector,3);	// Construimos el primer vector perpendicular.
+	// Construimos el tercer vector perpendicular con el producto vectorial.
+	VectorT vectorV = normal.prodVectorial(vectorU);
+	vectorV = vectorV / vectorV.modulo();
+	VectorT vectorSistema[3] = {vectorU, vectorV, normal};
+	// Creamos la matriz con el sistema de coordenadas.
+	Matriz sistema = Matriz(vectorSistema,3);
+	sistema = sistema.trasponer();	// Se traspone la matriz para tener vectores columna.
+	return sistema;		// Se devuelve el sistema.
+
+}
+
+/*
+ * Función que calcula las muestras uniformes de la semiesfera.
+ */
+Matriz uniformeSemiesfera(float theta, float phi){
+
+	// Se obtienen las tres coordenadas.
+	float x = sin(theta)*cos(theta);
+	float y = sin(theta)*sin(phi);
+	float z = cos(theta);
+	float vector[3] = {x,y,z};
+	VectorT coordenadas(vector,3);
+	VectorT vectores[] = {coordenadas};
+	// Se crea la matriz de coordenadas.
+	Matriz coord = Matriz(vectores,1);
+	coord = coord.trasponer();		// Se traspone para que queden en una columna.
+	return coord;		// Se devuelve la matriz.
 }
