@@ -50,6 +50,6 @@ void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
 void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
 VectorT trazarRayosSombra(Rayo, VectorT, VectorT, Esfera);
-VectorT indirectLigth(VectorT);
+VectorT indirectLight(VectorT, VectorT);
 Matriz sistemaCoordenadas(VectorT);
 Matriz uniformeSemiesfera(float, float);

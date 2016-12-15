@@ -1,4 +1,3 @@
-
 #include "Trazador.h"
 
 /*
@@ -121,8 +120,11 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
-				// Calcular luz indirecta.
-				//luz += indirectLigth();
+				if(rebote==0) {
+					// Calcular luz indirecta.
+					VectorT luzIndirecta = indirectLigth(puntoOrigen, normal);
+					luz = luz+luzIndirecta;
+				}
 			}
 			R = luz.getValPos(0);
 			G = luz.getValPos(1);
@@ -429,16 +431,14 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 /*
  * Método que calcula la luz indirecta.
  */
-VectorT indirectLight(VectorT normal){
+VectorT indirectLight(VectorT punto, VectorT normal){
 
 	// Declaramos los vectores para el sistema de coordenadas.
-	float vector[3] = {0,0,0};
-	VectorT vectorU = VectorT(vector,3);
-	VectorT vectorV = VectorT(vector,3);
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
 	float inicial[3] = {0,0,0};		// Inicializamos el color inicial.
 	VectorT luzIndirecta = VectorT(inicial,3);
 	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
+		float R = 0, G = 0, B = 0;
 		srand(time(NULL));		// Inicializamos la semilla.
 		float random1 = rand();		// Obtenemos el primer número aleatorio.
 		float random2 = rand();		// Obtenemos el segundo número aleatorio.
@@ -446,11 +446,18 @@ VectorT indirectLight(VectorT normal){
 		float theta = pow(cos(sqrt(1-random1)),-1);
 		float phi = 2*PI*random2;
 		Matriz coordenadas = uniformeSemiesfera(theta,phi);	// Obtenemos la coordenada random.
-		Matriz coordenadasMundo = sistema.mult(coordenadas);		// Pasamos a coordenadas del mundo.
+		// Pasamos a coordenadas del mundo.
+		Matriz coordenadasMundo = sistema.mult(coordenadas);
 		// Lanzamos el rayo para calcular el color.
+		VectorT direccion = coordenadasMundo.trasponer().getFila(0);
+		Rayo rayo = Rayo(&punto,&direccion);
+		trazarRayos(rayo, 1, R, G, B);
+		float color[3] = {R, G, B};
 		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
+		VectorT luzDevuelta = VectorT(color,3);
+		luzDevuelta = luzDevuelta*random1;
 		// Metemos en luz total la aportación captada por el rayo.
-		luzIndirecta += luzDevuelta;
+		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
 	// Calculamos la media de la contribución de cada color.
 	luzIndirecta = luzIndirecta / rayosIndirecta*2*PI;
