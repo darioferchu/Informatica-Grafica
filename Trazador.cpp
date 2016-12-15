@@ -460,11 +460,16 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 		Matriz coordenadasMundo = sistema.mult(coordenadas);
 		cout << "Multiplicación: ";
 				for(int i=0; i<3; i++){
-					cout << coordenadas.getFila(i).getValPos(0) << " ";
+					cout << coordenadasMundo.getFila(i).getValPos(0) << " ";
 				}
 				cout << endl;
 		// Lanzamos el rayo para calcular el color.
 		VectorT direccion = coordenadasMundo.trasponer().getFila(0);
+		cout << "direccion: ";
+						for(int i=0; i<3; i++){
+							cout << direccion.getValPos(i) << " ";
+						}
+						cout << endl;
 		Rayo rayo = Rayo(&punto,&direccion);
 		trazarRayos(rayo, 1, R, G, B);
 		float color[3] = {R, G, B};

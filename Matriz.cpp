@@ -112,7 +112,7 @@ Matriz Matriz::trasponer() {
 		for(int j = 0; j < tamFilas; j++) {
 			vector[j] = matriz[j].getValPos(i);
 		}
-		traspuesto[i] = VectorT(vector,tamColumnas);
+		traspuesto[i] = VectorT(vector,tamFilas);
 	}
 
 	return Matriz(traspuesto,tamColumnas);
@@ -149,7 +149,8 @@ Matriz Matriz::inversa() {
 
 	int i = 0; int j = 0; float pivote = 0;	// Variables para el calculo.
 	inver = new VectorT[tamFilas];	// Matriz inversa final.
-	for(int i=0; i<tamFilas; i++){		// Se rellena la matriz inversa con los valores iniciales.
+	for(int i=0; i<tamFilas; i++){
+		// Se rellena la matriz inversa con los valores iniciales.
 		float *vector = new float [tamFilas];
 		for(int j=0; j<tamFilas; j++){
 			vector[j] = matriz[i].getValPos(j);
@@ -206,5 +207,6 @@ void Matriz::otros(int i, int j, float pivote)
     for(x=0 ;x<tamFilas; x++)
         for(y=0; y<tamFilas; y++)
             if(x!=i && y!=j)
-    			b[x][y]=inver[x].getValPos(y)-(inver[i].getValPos(y)*inver[x].getValPos(j))/pivote;
+    			b[x][y]=inver[x].getValPos(y)-(inver[i].getValPos(y)*
+    					inver[x].getValPos(j))/pivote;
 }
