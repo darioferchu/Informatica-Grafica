@@ -122,7 +122,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
 				if(rebote==0) {
 					// Calcular luz indirecta.
-					VectorT luzIndirecta = indirectLigth(puntoOrigen, normal);
+					VectorT luzIndirecta = indirectLight(puntoOrigen, normal);
 					luz = luz+luzIndirecta;
 				}
 			}
@@ -435,19 +435,34 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 
 	// Declaramos los vectores para el sistema de coordenadas.
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
+	for(int i=0; i<3; i++){
+		for(int j=0; j<3; j++){
+			cout << sistema.getFila(i).getValPos(j) << " ";
+		}
+		cout << endl;
+	}
 	float inicial[3] = {0,0,0};		// Inicializamos el color inicial.
 	VectorT luzIndirecta = VectorT(inicial,3);
 	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
 		float R = 0, G = 0, B = 0;
-		srand(time(NULL));		// Inicializamos la semilla.
-		float random1 = rand();		// Obtenemos el primer número aleatorio.
-		float random2 = rand();		// Obtenemos el segundo número aleatorio.
+		float random1 = distribution(generator);		// Obtenemos el primer número aleatorio.
+		float random2 = distribution(generator);		// Obtenemos el segundo número aleatorio.
 		// Calculamos los valores de theta y phi.
 		float theta = pow(cos(sqrt(1-random1)),-1);
 		float phi = 2*PI*random2;
 		Matriz coordenadas = uniformeSemiesfera(theta,phi);	// Obtenemos la coordenada random.
+		cout << "Coordenadas: ";
+		for(int i=0; i<3; i++){
+			cout << coordenadas.getFila(i).getValPos(0) << " ";
+		}
+		cout << endl;
 		// Pasamos a coordenadas del mundo.
 		Matriz coordenadasMundo = sistema.mult(coordenadas);
+		cout << "Multiplicación: ";
+				for(int i=0; i<3; i++){
+					cout << coordenadas.getFila(i).getValPos(0) << " ";
+				}
+				cout << endl;
 		// Lanzamos el rayo para calcular el color.
 		VectorT direccion = coordenadasMundo.trasponer().getFila(0);
 		Rayo rayo = Rayo(&punto,&direccion);
@@ -470,12 +485,20 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 Matriz sistemaCoordenadas(VectorT normal){
 
 	// Inicializamos el vector con uno perpendicular a la normal.
-	float vector[3] = {normal.getValPos(0),-normal.getValPos(1),0};
+	float vector[3] = {normal.getValPos(1),-normal.getValPos(0),0};
 	VectorT vectorU = VectorT(vector,3);	// Construimos el primer vector perpendicular.
 	// Construimos el tercer vector perpendicular con el producto vectorial.
 	VectorT vectorV = normal.prodVectorial(vectorU);
 	vectorV = vectorV / vectorV.modulo();
 	VectorT vectorSistema[3] = {vectorU, vectorV, normal};
+	float prodEscalar = vectorU.prodEscalar(vectorV);
+	cout << prodEscalar << endl;
+	cout << "Vector1: " << normal.getValPos(0) << " " << normal.getValPos(1) << " " << normal.getValPos(2);
+	cout << endl;
+	cout << "Vector2: " << vectorV.getValPos(0) << " " << vectorV.getValPos(1) << " " << vectorV.getValPos(2);
+	cout << endl;
+	cout << "Vector3: " << vectorU.getValPos(0) << " " << vectorU.getValPos(1) << " " << vectorU.getValPos(2);
+	cout << endl;
 	// Creamos la matriz con el sistema de coordenadas.
 	Matriz sistema = Matriz(vectorSistema,3);
 	sistema = sistema.trasponer();	// Se traspone la matriz para tener vectores columna.
