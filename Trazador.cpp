@@ -54,11 +54,12 @@ void trazador(){
  * llama al método correspondiente para calcular color si encuentra
  * alguna esfera.
  */
-void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
+float trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 
+	float distInterseccion = infinito;
 	if(rebote != 5){
 		// Definimos las variables.
-		float distInterseccion = infinito; Esfera esfCercana; VectorT intersecta;
+		Esfera esfCercana; VectorT intersecta;
 		// Creamos el iterador para recorrer la lista.
 		list<Esfera>::iterator esfera = objetos.begin();
 		float nuevoIndice = -1;
@@ -145,6 +146,7 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			B = 0;
 		}
 	}
+	return distInterseccion;
 }
 
 
@@ -435,12 +437,13 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 
 	// Declaramos los vectores para el sistema de coordenadas.
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
+	/*cout <<"Sistema: " << endl;
 	for(int i=0; i<3; i++){
 		for(int j=0; j<3; j++){
 			cout << sistema.getFila(i).getValPos(j) << " ";
 		}
 		cout << endl;
-	}
+	}*/
 	float inicial[3] = {0,0,0};		// Inicializamos el color inicial.
 	VectorT luzIndirecta = VectorT(inicial,3);
 	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
@@ -448,39 +451,46 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 		float random1 = distribution(generator);		// Obtenemos el primer número aleatorio.
 		float random2 = distribution(generator);		// Obtenemos el segundo número aleatorio.
 		// Calculamos los valores de theta y phi.
-		float theta = pow(cos(sqrt(1-random1)),-1);
+		float theta = acos(sqrtf(1-random1));
 		float phi = 2*PI*random2;
 		Matriz coordenadas = uniformeSemiesfera(theta,phi);	// Obtenemos la coordenada random.
-		cout << "Coordenadas: ";
+		/*cout << "Coordenadas: ";
 		for(int i=0; i<3; i++){
 			cout << coordenadas.getFila(i).getValPos(0) << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 		// Pasamos a coordenadas del mundo.
 		Matriz coordenadasMundo = sistema.mult(coordenadas);
-		cout << "Multiplicación: ";
+		/*cout << "Multiplicación: ";
 				for(int i=0; i<3; i++){
 					cout << coordenadasMundo.getFila(i).getValPos(0) << " ";
 				}
-				cout << endl;
+				cout << endl;*/
 		// Lanzamos el rayo para calcular el color.
 		VectorT direccion = coordenadasMundo.trasponer().getFila(0);
-		cout << "direccion: ";
+		direccion = direccion / direccion.modulo();
+		/*cout << "direccion: ";
 						for(int i=0; i<3; i++){
 							cout << direccion.getValPos(i) << " ";
 						}
-						cout << endl;
+						cout << endl;*/
 		Rayo rayo = Rayo(&punto,&direccion);
 		trazarRayos(rayo, 1, R, G, B);
 		float color[3] = {R, G, B};
 		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
 		VectorT luzDevuelta = VectorT(color,3);
-		luzDevuelta = luzDevuelta*random1;
+		float coseno = cos(theta);
+		if(coseno < 0) {
+			coseno = 0;
+		}
+		//luzDevuelta = luzDevuelta / (distancia*distancia);
+		luzDevuelta = luzDevuelta*coseno;
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
 	// Calculamos la media de la contribución de cada color.
-	luzIndirecta = luzIndirecta / rayosIndirecta*2*PI;
+	luzIndirecta = luzIndirecta / (rayosIndirecta);
+
 	return luzIndirecta;		// Devolvemos la luz indirecta.
 }
 
@@ -493,17 +503,18 @@ Matriz sistemaCoordenadas(VectorT normal){
 	float vector[3] = {normal.getValPos(1),-normal.getValPos(0),0};
 	VectorT vectorU = VectorT(vector,3);	// Construimos el primer vector perpendicular.
 	// Construimos el tercer vector perpendicular con el producto vectorial.
+	vectorU = vectorU / vectorU.modulo();
 	VectorT vectorV = normal.prodVectorial(vectorU);
 	vectorV = vectorV / vectorV.modulo();
 	VectorT vectorSistema[3] = {vectorU, vectorV, normal};
-	float prodEscalar = vectorU.prodEscalar(vectorV);
+	/*float prodEscalar = vectorU.prodEscalar(vectorV);
 	cout << prodEscalar << endl;
 	cout << "Vector1: " << normal.getValPos(0) << " " << normal.getValPos(1) << " " << normal.getValPos(2);
 	cout << endl;
 	cout << "Vector2: " << vectorV.getValPos(0) << " " << vectorV.getValPos(1) << " " << vectorV.getValPos(2);
 	cout << endl;
 	cout << "Vector3: " << vectorU.getValPos(0) << " " << vectorU.getValPos(1) << " " << vectorU.getValPos(2);
-	cout << endl;
+	cout << endl;*/
 	// Creamos la matriz con el sistema de coordenadas.
 	Matriz sistema = Matriz(vectorSistema,3);
 	sistema = sistema.trasponer();	// Se traspone la matriz para tener vectores columna.
@@ -517,9 +528,9 @@ Matriz sistemaCoordenadas(VectorT normal){
 Matriz uniformeSemiesfera(float theta, float phi){
 
 	// Se obtienen las tres coordenadas.
-	float x = sin(theta)*cos(theta);
-	float y = sin(theta)*sin(phi);
-	float z = cos(theta);
+	float x = sinf(theta)*cosf(phi);
+	float y = sinf(theta)*sinf(phi);
+	float z = cosf(theta);
 	float vector[3] = {x,y,z};
 	VectorT coordenadas(vector,3);
 	VectorT vectores[] = {coordenadas};
