@@ -7,8 +7,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <list>
+#include <random>
 using namespace std;
-
 /*
  * Definiciones de valores de variables.
  */
@@ -29,7 +29,7 @@ float tamPixel = 0.0;	// Tamaño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
 float RUltimo = 0, GUltimo = 0, BUltimo = 0;
-int rayosIndirecta = 16; 	// Número de rayos de luz indirecta.
+int rayosIndirecta = 4; 	// Número de rayos de luz indirecta.
 int numEscritos = 0;	// Número de pixeles escritos.
 ofstream ficheroSalida;	// Fichero de salida.
 list<Esfera> objetos;	// Lista de objetos de la escena.
@@ -39,7 +39,7 @@ list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
  * Métodos del trazador.
  */
 void trazador();
-void trazarRayos(Rayo, int, float&, float&, float&);
+VectorT trazarRayos(Rayo, int, float&, float&, float&);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
@@ -50,6 +50,7 @@ void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
 void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
 VectorT trazarRayosSombra(Rayo, VectorT, VectorT, Esfera);
-VectorT indirectLight(VectorT, VectorT);
+VectorT indirectLight(VectorT, VectorT, Esfera, VectorT);
 Matriz sistemaCoordenadas(VectorT);
 Matriz uniformeSemiesfera(float, float);
+double random();

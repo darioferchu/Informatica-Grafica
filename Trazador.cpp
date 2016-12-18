@@ -54,8 +54,8 @@ void trazador(){
  * llama al método correspondiente para calcular color si encuentra
  * alguna esfera.
  */
-float trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
-
+VectorT trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
+	VectorT puntoOrigen;
 	float distInterseccion = infinito;
 	if(rebote != 5){
 		// Definimos las variables.
@@ -101,7 +101,7 @@ float trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			normal = normal / normal.modulo();	// Se normaliza.
 			// Se modifica el punto de intersecci�n por errores de precisi�n.
 			float bias = 0.0001;
-			VectorT puntoOrigen = puntoIntersectado + (normal*bias);
+			puntoOrigen = puntoIntersectado + (normal*bias);
 			VectorT luz;
 			//Si el objeto es reflectante se obtiene el color reflejado.
 			if(esfCercana.getMaterial() == REFLECTANTE) {
@@ -123,7 +123,8 @@ float trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
 				if(rebote==0) {
 					// Calcular luz indirecta.
-					VectorT luzIndirecta = indirectLight(puntoOrigen, normal);
+					VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
+							ray.getDireccion());
 					luz = luz+luzIndirecta;
 				}
 			}
@@ -146,7 +147,7 @@ float trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			B = 0;
 		}
 	}
-	return distInterseccion;
+	return puntoOrigen;
 }
 
 
@@ -433,7 +434,7 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 /*
  * Método que calcula la luz indirecta.
  */
-VectorT indirectLight(VectorT punto, VectorT normal){
+VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCam){
 
 	// Declaramos los vectores para el sistema de coordenadas.
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
@@ -448,8 +449,8 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 	VectorT luzIndirecta = VectorT(inicial,3);
 	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
 		float R = 0, G = 0, B = 0;
-		float random1 = distribution(generator);		// Obtenemos el primer número aleatorio.
-		float random2 = distribution(generator);		// Obtenemos el segundo número aleatorio.
+		float random1 = random();		// Obtenemos el primer número aleatorio.
+		float random2 = random();		// Obtenemos el segundo número aleatorio.
 		// Calculamos los valores de theta y phi.
 		float theta = acos(sqrtf(1-random1));
 		float phi = 2*PI*random2;
@@ -475,21 +476,29 @@ VectorT indirectLight(VectorT punto, VectorT normal){
 						}
 						cout << endl;*/
 		Rayo rayo = Rayo(&punto,&direccion);
-		trazarRayos(rayo, 1, R, G, B);
+		VectorT puntoIndirecta = trazarRayos(rayo, 1, R, G, B);
+		VectorT dirSombra = (puntoIndirecta -punto);
+		dirSombra = dirSombra/dirSombra.modulo();
+		float distancia = dirSombra.modulo();
+		Rayo sombra = Rayo(&punto, &dirSombra);
 		float color[3] = {R, G, B};
 		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
 		VectorT luzDevuelta = VectorT(color,3);
-		float coseno = cos(theta);
+		luzDevuelta = luzDevuelta / (distancia*distancia);
+		VectorT p = phong(sombra, normal, dirCam, esfera, esfera.getMaterial()==PHONG);
+		luzDevuelta.setValPos(p.getValPos(0)*luzDevuelta.getValPos(0),0);
+		luzDevuelta.setValPos(p.getValPos(1)*luzDevuelta.getValPos(1),1);
+		luzDevuelta.setValPos(p.getValPos(2)*luzDevuelta.getValPos(2),2);
+		float coseno = cosf(theta);
 		if(coseno < 0) {
-			coseno = 0;
+			coseno = -coseno;
 		}
-		//luzDevuelta = luzDevuelta / (distancia*distancia);
 		luzDevuelta = luzDevuelta*coseno;
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
 	// Calculamos la media de la contribución de cada color.
-	luzIndirecta = luzIndirecta / (rayosIndirecta);
+	luzIndirecta = luzIndirecta / rayosIndirecta;
 
 	return luzIndirecta;		// Devolvemos la luz indirecta.
 }
@@ -538,4 +547,12 @@ Matriz uniformeSemiesfera(float theta, float phi){
 	Matriz coord = Matriz(vectores,1);
 	coord = coord.trasponer();		// Se traspone para que queden en una columna.
 	return coord;		// Se devuelve la matriz.
+}
+
+
+double random() {
+	static random_device dev;
+	static default_random_engine generator(dev());
+	static uniform_real_distribution<double> distribution(0.0,1.0);
+	return distribution(generator);
 }
