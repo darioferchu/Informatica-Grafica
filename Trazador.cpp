@@ -121,28 +121,28 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
-				luz.setValPos(luz.getValPos(0)*255,0);
-				luz.setValPos(luz.getValPos(1)*255,1);
-				luz.setValPos(luz.getValPos(2)*255,2);
+				luz.setValPos(luz.getValPos(0),0);
+				luz.setValPos(luz.getValPos(1),1);
+				luz.setValPos(luz.getValPos(2),2);
 				if(rebote==0) {
 					// Calcular luz indirecta.
-					VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
+					/*VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
 							ray.getDireccion());
-					luz = luz+luzIndirecta;
+					luz = luz+luzIndirecta;*/
 				}
 			}
 			R = luz.getValPos(0);
 			G = luz.getValPos(1);
 			B = luz.getValPos(2);
-			//Si sobrepasa el maximo se iguala a 255.
-			if(R > 255) {
-				R = 255;
+			//Si sobrepasa el maximo se iguala a 1.
+			if(R > 1) {
+				R = 1;
 			}
-			if(G > 255) {
-				G = 255;
+			if(G > 1) {
+				G = 1;
 			}
-			if(B > 255) {
-				B = 255;
+			if(B > 1) {
+				B = 1;
 			}
 		} else{		// Si no ha intersectado se pone color de fondo.
 			R = 0;
@@ -348,6 +348,9 @@ void leerFichero(){
  */
 void escribirColor(float R, float G, float B, int columna){
 
+	R = R*255;
+	G = G*255;
+	B = B*255;
 	// Escribimos el color del píxel.
 	ficheroSalida << (int)R<< " " << (int)G << " " << (int)B <<" ";
 	// Se escribe salto de línea al acabar una fila.
@@ -497,9 +500,9 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCa
 			senoAbsoluto = -seno;
 		}
 		luzDevuelta = (luzDevuelta*cosenoAbsoluto*senoAbsoluto)/(seno*coseno/PI);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(0)*255,0);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(1)*255,1);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(2)*255,2);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(0),0);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(1),1);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(2),2);
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
