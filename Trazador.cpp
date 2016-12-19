@@ -54,7 +54,7 @@ void trazador(){
  * llama al método correspondiente para calcular color si encuentra
  * alguna esfera.
  */
-VectorT trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
+void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 	VectorT puntoOrigen;
 	float distInterseccion = infinito;
 	if(rebote != 5){
@@ -124,7 +124,7 @@ VectorT trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				if(rebote==0) {
 					// Calcular luz indirecta.
 					VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
-							ray.getDireccion());
+							ray.getPunto());
 					luz = luz+luzIndirecta;
 				}
 			}
@@ -147,7 +147,6 @@ VectorT trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 			B = 0;
 		}
 	}
-	return puntoOrigen;
 }
 
 
@@ -347,7 +346,7 @@ void leerFichero(){
 void escribirColor(float R, float G, float B, int columna){
 
 	// Escribimos el color del píxel.
-	ficheroSalida << (int)R << " " << (int)G << " " << (int)B <<" ";
+	ficheroSalida << (int)R<< " " << (int)G << " " << (int)B <<" ";
 	// Se escribe salto de línea al acabar una fila.
 	if(columna-anchura==0){
 		ficheroSalida << "\n";
@@ -434,7 +433,7 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 /*
  * Método que calcula la luz indirecta.
  */
-VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCam){
+VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT puntoCam){
 
 	// Declaramos los vectores para el sistema de coordenadas.
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
@@ -452,7 +451,7 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCa
 		float random1 = random();		// Obtenemos el primer número aleatorio.
 		float random2 = random();		// Obtenemos el segundo número aleatorio.
 		// Calculamos los valores de theta y phi.
-		float theta = acos(sqrtf(1-random1));
+		float theta = acosf(sqrtf(1-random1));
 		float phi = 2*PI*random2;
 		Matriz coordenadas = uniformeSemiesfera(theta,phi);	// Obtenemos la coordenada random.
 		/*cout << "Coordenadas: ";
@@ -476,24 +475,26 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCa
 						}
 						cout << endl;*/
 		Rayo rayo = Rayo(&punto,&direccion);
-		VectorT puntoIndirecta = trazarRayos(rayo, 1, R, G, B);
-		VectorT dirSombra = (puntoIndirecta -punto);
-		dirSombra = dirSombra/dirSombra.modulo();
-		float distancia = dirSombra.modulo();
-		Rayo sombra = Rayo(&punto, &dirSombra);
+		trazarRayos(rayo, 1, R, G, B);
 		float color[3] = {R, G, B};
 		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
 		VectorT luzDevuelta = VectorT(color,3);
-		luzDevuelta = luzDevuelta / (distancia*distancia);
-		VectorT p = phong(sombra, normal, dirCam, esfera, esfera.getMaterial()==PHONG);
+		VectorT dirCam = puntoCam - punto;
+		VectorT p = phong(rayo, normal, dirCam, esfera, esfera.getMaterial()==PHONG);
 		luzDevuelta.setValPos(p.getValPos(0)*luzDevuelta.getValPos(0),0);
 		luzDevuelta.setValPos(p.getValPos(1)*luzDevuelta.getValPos(1),1);
 		luzDevuelta.setValPos(p.getValPos(2)*luzDevuelta.getValPos(2),2);
 		float coseno = cosf(theta);
+		float cosenoAbsoluto = coseno;
 		if(coseno < 0) {
-			coseno = -coseno;
+			cosenoAbsoluto = -coseno;
 		}
-		luzDevuelta = luzDevuelta*coseno;
+		float seno = sinf(theta);
+		float senoAbsoluto = seno;
+		if(seno < 0) {
+			senoAbsoluto = -seno;
+		}
+		luzDevuelta = (luzDevuelta*cosenoAbsoluto*senoAbsoluto)/(seno*coseno/PI);
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
@@ -550,9 +551,9 @@ Matriz uniformeSemiesfera(float theta, float phi){
 }
 
 
-double random() {
+float random() {
 	static random_device dev;
 	static default_random_engine generator(dev());
-	static uniform_real_distribution<double> distribution(0.0,1.0);
+	static uniform_real_distribution<float> distribution(0.0,1.0);
 	return distribution(generator);
 }

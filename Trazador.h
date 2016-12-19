@@ -29,7 +29,7 @@ float tamPixel = 0.0;	// Tamaño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
 float RUltimo = 0, GUltimo = 0, BUltimo = 0;
-int rayosIndirecta = 4; 	// Número de rayos de luz indirecta.
+int rayosIndirecta = 16; 	// Número de rayos de luz indirecta.
 int numEscritos = 0;	// Número de pixeles escritos.
 ofstream ficheroSalida;	// Fichero de salida.
 list<Esfera> objetos;	// Lista de objetos de la escena.
@@ -39,7 +39,7 @@ list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
  * Métodos del trazador.
  */
 void trazador();
-VectorT trazarRayos(Rayo, int, float&, float&, float&);
+void trazarRayos(Rayo, int, float&, float&, float&);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
@@ -53,4 +53,4 @@ VectorT trazarRayosSombra(Rayo, VectorT, VectorT, Esfera);
 VectorT indirectLight(VectorT, VectorT, Esfera, VectorT);
 Matriz sistemaCoordenadas(VectorT);
 Matriz uniformeSemiesfera(float, float);
-double random();
+float random();
