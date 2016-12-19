@@ -1,5 +1,5 @@
 0.002*1*1*0.5*0.5*0			//Tama�o pixel, 2*tama�o plano y 3*observador
-Luz*0.5*0.9*2*3		//Foco luz(3*posicion,potencia)
+Luz*0.5*0.9*2*1		//Foco luz(3*posicion,potencia)
 Esfera*101*0.5*2*100*3*127*0*0			//Pared derecha(3*posicion,radio,tipo,3*color)
 Esfera*0.5*101*2*100*3*0*127*0			//Pared arriba(3*posicion,radio,tipo,3*color)
 Esfera*-100*0.5*2*100*3*0*0*127			//Pared izquierda(3*posicion,radio,3*color)

@@ -121,10 +121,13 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
+				luz.setValPos(luz.getValPos(0)*255,0);
+				luz.setValPos(luz.getValPos(1)*255,1);
+				luz.setValPos(luz.getValPos(2)*255,2);
 				if(rebote==0) {
 					// Calcular luz indirecta.
 					VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
-							ray.getPunto());
+							ray.getDireccion());
 					luz = luz+luzIndirecta;
 				}
 			}
@@ -287,9 +290,9 @@ void leerFichero(){
 				objetos.push_back(esfera);
 			}  else if(material == PHONG){
 				// Leemos color.
-				color[0] = stof(strtok(NULL,"*"));
-				color[1] = stof(strtok(NULL,"*"));
-				color[2] = stof(strtok(NULL,"*"));
+				color[0] = stof(strtok(NULL,"*"))/255;
+				color[1] = stof(strtok(NULL,"*"))/255;
+				color[2] = stof(strtok(NULL,"*"))/255;
 				ks = stof(strtok(NULL,"*"));
 				alpha = stof(strtok(NULL,"*"));
 				// Creamos la esfera y la introducimos en la lista.
@@ -299,9 +302,9 @@ void leerFichero(){
 				objetos.push_back(esfera);
 			} else if(material == LAMBERTIANO) {
 				// Leemos color.
-				color[0] = stof(strtok(NULL,"*"));
-				color[1] = stof(strtok(NULL,"*"));
-				color[2] = stof(strtok(NULL,"*"));
+				color[0] = stof(strtok(NULL,"*"))/255;
+				color[1] = stof(strtok(NULL,"*"))/255;
+				color[2] = stof(strtok(NULL,"*"))/255;
 				// Creamos la esfera y la introducimos en la lista.
 				Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
 				objetos.push_back(esfera);
@@ -433,7 +436,7 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 /*
  * Método que calcula la luz indirecta.
  */
-VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT puntoCam){
+VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCam){
 
 	// Declaramos los vectores para el sistema de coordenadas.
 	Matriz sistema = sistemaCoordenadas(normal);	// Calculamos el sistema de coordenadas.
@@ -448,8 +451,8 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT punto
 	VectorT luzIndirecta = VectorT(inicial,3);
 	for(int i=0; i<rayosIndirecta; i++){		// Lanzamos los rayos de luz indirecta.
 		float R = 0, G = 0, B = 0;
-		float random1 = random();		// Obtenemos el primer número aleatorio.
-		float random2 = random();		// Obtenemos el segundo número aleatorio.
+		float random1 = distribution(generator);		// Obtenemos el primer número aleatorio.
+		float random2 = distribution(generator);		// Obtenemos el segundo número aleatorio.
 		// Calculamos los valores de theta y phi.
 		float theta = acosf(sqrtf(1-random1));
 		float phi = 2*PI*random2;
@@ -479,7 +482,6 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT punto
 		float color[3] = {R, G, B};
 		// VectorT luzDevuelta = cos(theta)*lanzarRayo;
 		VectorT luzDevuelta = VectorT(color,3);
-		VectorT dirCam = puntoCam - punto;
 		VectorT p = phong(rayo, normal, dirCam, esfera, esfera.getMaterial()==PHONG);
 		luzDevuelta.setValPos(p.getValPos(0)*luzDevuelta.getValPos(0),0);
 		luzDevuelta.setValPos(p.getValPos(1)*luzDevuelta.getValPos(1),1);
@@ -495,6 +497,9 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT punto
 			senoAbsoluto = -seno;
 		}
 		luzDevuelta = (luzDevuelta*cosenoAbsoluto*senoAbsoluto)/(seno*coseno/PI);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(0)*255,0);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(1)*255,1);
+		luzDevuelta.setValPos(luzDevuelta.getValPos(2)*255,2);
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
@@ -548,12 +553,4 @@ Matriz uniformeSemiesfera(float theta, float phi){
 	Matriz coord = Matriz(vectores,1);
 	coord = coord.trasponer();		// Se traspone para que queden en una columna.
 	return coord;		// Se devuelve la matriz.
-}
-
-
-float random() {
-	static random_device dev;
-	static default_random_engine generator(dev());
-	static uniform_real_distribution<float> distribution(0.0,1.0);
-	return distribution(generator);
 }
