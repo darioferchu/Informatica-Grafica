@@ -121,14 +121,11 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B){
 				luz = VectorT(RGB, 3);	//Se inicializa color.
 			} else {
 				luz = trazarRayosSombra(ray, puntoOrigen, normal, esfCercana);
-				luz.setValPos(luz.getValPos(0),0);
-				luz.setValPos(luz.getValPos(1),1);
-				luz.setValPos(luz.getValPos(2),2);
 				if(rebote==0) {
 					// Calcular luz indirecta.
-					/*VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
+					VectorT luzIndirecta = indirectLight(puntoOrigen, normal,esfCercana,
 							ray.getDireccion());
-					luz = luz+luzIndirecta;*/
+					luz = luz+luzIndirecta;
 				}
 			}
 			R = luz.getValPos(0);
@@ -500,9 +497,6 @@ VectorT indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCa
 			senoAbsoluto = -seno;
 		}
 		luzDevuelta = (luzDevuelta*cosenoAbsoluto*senoAbsoluto)/(seno*coseno/PI);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(0),0);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(1),1);
-		luzDevuelta.setValPos(luzDevuelta.getValPos(2),2);
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
