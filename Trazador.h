@@ -25,6 +25,7 @@ enum {PHONG = 0, REFLECTANTE = 1, TRANSPARENTE = 2, LAMBERTIANO = 3};
  */
 float camara[] = {0.0, 0.0, 0.0};		// Posición de la cámara.
 float esferaCoor[] = {255.0, 255.0, 100.0};
+float **buffer;
 float anchura = 0.0;	// Anchura del plano.
 float altura = 0.0;		// Altura del plano.
 float distancia = 0.0;	// Distancia entre el observador y el plano.
@@ -42,17 +43,17 @@ list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
  * Métodos del trazador.
  */
 void trazador();
-void trazarRayos(Rayo, int, float&, float&, float&);
+void trazarRayos(Rayo, int, float&, float&, float&,bool);
 VectorT interseccion(Rayo, Esfera);
 VectorT resolverSegundoGrado(float,float,float);
 void leerFichero();
-void escribirColor(float,float,float,int);
+void escribirColor();
 void escribirCabecera();
 VectorT phong(Rayo, VectorT, VectorT, Esfera, bool);
 void reflection(VectorT, int, VectorT, VectorT, float&, float&, float&);
 void refraction(VectorT, int, VectorT, VectorT, Esfera,float, float&, float&, float&);
 VectorT objetosIntersectados(Rayo);
 VectorT trazarRayosSombra(Rayo, VectorT, VectorT, Esfera);
-VectorT indirectLight(VectorT, VectorT, Esfera, VectorT);
+VectorT indirectLight(VectorT, VectorT, Esfera, VectorT,int);
 Matriz sistemaCoordenadas(VectorT);
 Matriz uniformeSemiesfera(float, float);
