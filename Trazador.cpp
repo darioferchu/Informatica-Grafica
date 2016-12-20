@@ -10,7 +10,7 @@ int main(){
 	ficheroSalida.open ("ficheroEscena.ppm");
 	// Leemos el fichero.
 	leerFichero();
-	buffer = new float* [(int)altura];
+	buffer = new float* [(int)(altura/tamPixel)];
 	for(int i = 0; i < altura/tamPixel;i++) {
 		buffer[i] = new float[(int)((anchura/tamPixel)*3)];
 	}
@@ -242,7 +242,6 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 		VectorT OC = ray.getPunto() - esfera.getCentro();
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
 		float c = OC.prodEscalar(OC) - pow(esfera.getRadio(),2);
-		OC.~VectorT();
 		return resolverSegundoGrado(a,b,c);
 }
 
@@ -355,10 +354,10 @@ void leerFichero(){
  * Función que escribe en el fichero el color del pixel.
  */
 void escribirColor(){
-	for(int i = 0; i < altura; i++) {
-		for(int j = 0; j < anchura*3; j++) {
+	for(int i = 0; i < altura/tamPixel; i++) {
+		for(int j = 0; j < (anchura/tamPixel)*3; j++) {
 			// Escribimos el color del píxel.
-			ficheroSalida << (int)buffer[i][j] << " ";
+			ficheroSalida << (int)(buffer[i][j]*255) << " ";
 			// Se escribe salto de línea al acabar una fila.
 			if(j%21==0){
 				ficheroSalida << "\n";

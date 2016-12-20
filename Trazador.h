@@ -33,7 +33,7 @@ float tamPixel = 0.0;	// Tamaño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
 float RUltimo = 0, GUltimo = 0, BUltimo = 0;
-int rayosIndirecta = 16; 	// Número de rayos de luz indirecta.
+int rayosIndirecta = 4; 	// Número de rayos de luz indirecta.
 int numEscritos = 0;	// Número de pixeles escritos.
 ofstream ficheroSalida;	// Fichero de salida.
 list<Esfera> objetos;	// Lista de objetos de la escena.
