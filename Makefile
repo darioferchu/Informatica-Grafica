@@ -1,21 +1,24 @@
 COMPILAR=g++ -std=c++11 -Wall
 
-all: trazador.exe
+all: ray-trace.exe
 
-trazador.exe: Trazador.o Rayo.o Esfera.o Fuente.o Matriz.o VectorT.o 
-	$(COMPILAR) -o trazador.exe Trazador.o Rayo.o Esfera.o Fuente.o Matriz.o VectorT.o 
+ray-trace.exe: Trazador.o Rayo.o Esfera.o Fuente.o Objeto.o Matriz.o VectorT.o 
+	$(COMPILAR) -o ray-trace.exe Trazador.o Rayo.o Esfera.o Fuente.o Objeto.o Matriz.o VectorT.o 
 	
 Trazador.o: Trazador.cpp Trazador.h
 	$(COMPILAR) -c Trazador.cpp
 	
 Rayo.o: Rayo.cpp Rayo.h
 	$(COMPILAR) -c Rayo.cpp
-
-Esfera.o: Esfera.cpp Esfera.h
-	$(COMPILAR) -c Esfera.cpp
 	
 Fuente.o: Fuente.cpp Fuente.h
 	$(COMPILAR) -c Fuente.cpp
+
+Esfera.o: Esfera.cpp Esfera.h
+	$(COMPILAR) -c Esfera.cpp
+
+Objeto.o: Objeto.cpp Objeto.h
+	$(COMPILAR) -c Objeto.cpp
 	
 Matriz.o: Matriz.cpp Matriz.h
 	$(COMPILAR) -c Matriz.cpp
@@ -25,5 +28,5 @@ VectorT.o: VectorT.cpp VectorT.h
 	
 clean:
 	rm -f *.o
-	rm -f trazador.exe
+	rm -f ray-trace.exe
 	

@@ -32,7 +32,7 @@ float distancia = 0.0;	// Distancia entre el observador y el plano.
 float tamPixel = 0.0;	// Tamaño del pixel.
 float IRefraccion = 1;
 float IRefAnterior = 1;
-int rayosIndirecta = 16; 	// Número de rayos de luz indirecta.
+int rayosIndirecta = 4; 	// Número de rayos de luz indirecta.
 ofstream ficheroSalida;	// Fichero de salida.
 list<Esfera> objetos;	// Lista de objetos de la escena.
 list<Fuente> fuentesLuz;	// Lista de las fuentes de luz de la escena.
