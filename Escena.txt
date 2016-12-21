@@ -12,3 +12,4 @@ Esfera*0.6*0.4*2.2*0.05*0*0*255*180*0.25*100			//Phong(3*posicion,radio,tipo,3*c
 Esfera*0.8*0.3*2.09*0.06*0*200*180*50*0.25*100			//Phong(3*posicion,radio,tipo,3*color)
 Esfera*0.4*0.1*2.1*0.1*0*0*0*250*0.25*100			//Phong(3*posicion,radio,tipo,3*color)
 Esfera*0.6*0.1*2.2*0.1*2*1.5
+Esfera*0.2*0.5*2.4*0.1*1*
