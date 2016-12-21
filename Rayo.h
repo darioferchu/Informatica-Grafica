@@ -7,7 +7,7 @@
  */
 class Rayo {
 	public:
-		Rayo(VectorT[],VectorT[]);	// Constructor con parámetros.
+		Rayo(VectorT,VectorT);	// Constructor con parámetros.
 		~Rayo();	// Destructor.
 
 		// Métodos getter.
@@ -15,6 +15,6 @@ class Rayo {
 		VectorT getPunto();
 
 	private:
-		VectorT *punto;	// Punto del rayo.
-		VectorT *direccion;	// Dirección del rayo.
+		VectorT punto;	// Punto del rayo.
+		VectorT direccion;	// Dirección del rayo.
 };

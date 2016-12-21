@@ -4,7 +4,7 @@
 /*
  * Constructor de un objeto Rayo.
  */
-Rayo::Rayo(VectorT puntoR[], VectorT direccionR[]) {
+Rayo::Rayo(VectorT puntoR, VectorT direccionR) {
 
 	punto = puntoR;
 	direccion = direccionR;
@@ -20,7 +20,7 @@ Rayo::~Rayo() {}
  */
 VectorT Rayo::getDireccion(){
 
-	return *direccion;
+	return direccion;
 }
 
 /*
@@ -28,5 +28,5 @@ VectorT Rayo::getDireccion(){
  */
 VectorT Rayo::getPunto() {
 
-	return *punto;
+	return punto;
 }

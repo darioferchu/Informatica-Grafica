@@ -9,7 +9,8 @@ int main(){
 	// Inicializamos el fichero de salida.
 	ficheroSalida.open ("ficheroEscena.ppm");
 	// Leemos el fichero.
-	leerFichero();
+	leerFichero();		//Se leen los datos de la escena.
+	//Se crea el buffer donde se almacenaran los datos a escribir.
 	buffer = new float* [(int)(altura/tamPixel+0.5)];
 	for(int i = 0; i < (int)(altura/tamPixel+0.5);i++) {
 		buffer[i] = new float[(int)(anchura/tamPixel+0.5)*3];
@@ -19,10 +20,11 @@ int main(){
 	// Iniciamos el trazador de rayos.
 	trazador();
 	cout << "Escribiendo Fichero..." << endl;
-	escribirColor();
+	escribirColor();		//Se escribe en el fichero.
 	// Cerramos el fichero.
 	ficheroSalida.close();
 	cout << "Fichero escrito." << endl;
+	//Se libera la memoria reservada en el buffer.
 	for(int j = 0; j < (int)(altura/tamPixel+0.5);j++) {
 		delete[] buffer[j];
 	}
@@ -50,6 +52,7 @@ void trazador(){
 	for(float i=arriba-tamPixel/2; i>abajo; i=i-tamPixel){
 		int t = 0;
 		for(float j=izquierdo+tamPixel/2; j<derecho; j=j+tamPixel){
+			//Se inicializan valores.
 			float R = 0.0;
 			float G = 0.0;
 			float B = 0.0;
@@ -60,12 +63,14 @@ void trazador(){
 			direccionRayo[2] = distancia-camara[2];
 			VectorT direccion = VectorT(direccionRayo,3);
 			direccion = direccion / direccion.modulo();	// Normalizamos con el modulo.
-			Rayo ray = Rayo(&punto,&direccion);	// Creamos el rayo.
+			Rayo ray = Rayo(punto,direccion);	// Creamos el rayo.
 			trazarRayos(ray,0,R,G,B,false);	// Trazamos el rayo.
+			//Se almacenan los resultados en el buffer.
 			buffer[k][t] = R;
 			buffer[k][t+1] = G;
 			buffer[k][t+2] = B;
 			t = t + 3;
+			//Se informa del progreso del programa.
 			porcentaje = ((k*(anchura/tamPixel)+t/3)/((altura/tamPixel)*(anchura/tamPixel)))*100;
 			if(porcentaje -porcentajeAnterior >=1 && (int)porcentaje != 100) {
 				porcentajeAnterior = porcentaje;
@@ -75,6 +80,7 @@ void trazador(){
 		}
 		k++;
 	}
+	//Se informa que se han calculado todos los pixeles.
 	cout << "Pixeles calculados: 100%" << endl;
 }
 
@@ -84,14 +90,15 @@ void trazador(){
  * alguna esfera.
  */
 void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B, bool indirecta){
-	float distInterseccion = infinito;
-	if(rebote != 5){
+	if(rebote != 5){ //Se ejecuta solo si no supera el numero de rebotes.
+		//Se inicializa la distancia de interseciion con valor infinito.
+		float distInterseccion = infinito;
 		// Definimos las variables.
 		Esfera esfCercana; VectorT intersecta;
 		// Creamos el iterador para recorrer la lista.
 		list<Esfera>::iterator esfera = objetos.begin();
-		float nuevoIndice = -1;
-		bool salida = false;
+		float nuevoIndice = -1;		//Se inicializa el nuevo indice de refracción a -1.
+		bool salida = false;		//Booleano que indica si se esta saliendo de una esfera.
 		while(esfera != objetos.end()){	// Recorremos los objetos para saber intersecciones.
 			Esfera esfActual = *esfera;	// Sacamos la esfera actual.
 			// Se calcula la distancia de intersección.
@@ -105,8 +112,9 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B, bool indire
 				// Se guarda el objeto con el que ha intersectado.
 				esfCercana = esfActual;
 				nuevoIndice = esfActual.getIor();
-			} else if(intersecta.getLon() > 1 &&
-					// Se mira si se está saliendo de una transparente.
+			}
+			// Se mira si se está saliendo de una transparente.
+			else if(intersecta.getLon() > 1 &&
 					esfActual.getMaterial() == TRANSPARENTE &&
 					intersecta.getValPos(1) > 0 &&
 					intersecta.getValPos(1) < distInterseccion) {
@@ -139,17 +147,25 @@ void trazarRayos(Rayo ray, int rebote, float &R, float &G, float &B, bool indire
 				if(salida) {
 					refraction(ray.getDireccion(), rebote, normal,
 							puntoOrigen,esfCercana, nuevoIndice, R, G, B);
-				} else {
+				}
+				//Si se esta entrando en una esfera refractante se debe modificar el punto
+				//intersectado para evitar fallos de precisión.
+				else {
 					refraction(ray.getDireccion(), rebote, normal,
 							puntoIntersectado-(normal*bias),esfCercana, nuevoIndice, R, G, B);
 				}
 			} else {
+				//Si es phong o lambertiana se lanzan los rayos de sombra.
 				trazarRayosSombra(ray, puntoOrigen, normal, esfCercana,R,G,B);
+				//Si no se esta calculando en este momento luz indirecta, se calcula
+				//para el punto actual.
 				if(!indirecta) {
+					//Se inicializan valores.
 					float Rindirecta = 0.0, Gindirecta = 0.0, Bindirecta = 0.0;
-					// Calcular luz indirecta.
+					//Se calcula luz indirecta.
 					indirectLight(puntoOrigen, normal,esfCercana,
 							ray.getDireccion(),rebote, Rindirecta, Gindirecta, Bindirecta);
+					//Se suma lo obtenido a luz directa.
 					R = R + Rindirecta;
 					G = G + Gindirecta;
 					B = B + Bindirecta;
@@ -192,7 +208,7 @@ void trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal,
 		//Se obtiene la dirección del rayo sombra.
 		VectorT dirRSombra = fuenteActual.getPunto() - puntoIntersectado;
 		dirRSombra = dirRSombra / dirRSombra.modulo();	// Se normaliza.
-		Rayo rayoSombra = Rayo(&puntoIntersectado, &dirRSombra);	// Se crea el rayo.
+		Rayo rayoSombra = Rayo(puntoIntersectado, dirRSombra);	// Se crea el rayo.
 
 		// Iterador para recorres los objetos de la escena.
 		list<Esfera>::iterator esfera = objetos.begin();
@@ -207,8 +223,9 @@ void trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal,
 			intersecta = interseccion(rayoSombra, esfActual);
 			// Se comprueba si está entre el foco y la esfera.
 			if(intersecta.getValPos(0) >= 0 && intersecta.getValPos(0)<distanciaFuente){
-				// Si es transparente, la luz pasara.
+				//Se indica que no le alcanza la luz de esta fuente.
 				sombra = true;
+				//Se sale del bucle.
 				break;
 			}
 			*esfera++;	// Se pasa a la siguiente esfera.
@@ -237,6 +254,7 @@ void trazarRayosSombra(Rayo ray, VectorT puntoIntersectado, VectorT normal,
 		}
 		*fuente++;		// Se pasa a la siguiente fuente de luz.
 	}
+	//Se asignan el valor final obtenido.
 	R = luzTotal.getValPos(0);
 	G = luzTotal.getValPos(1);
 	B = luzTotal.getValPos(2);
@@ -251,8 +269,7 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 		VectorT OC = ray.getPunto() - esfera.getCentro();
 		float b = 2.0*(ray.getDireccion().prodEscalar(OC));
 		float c = OC.prodEscalar(OC) - pow(esfera.getRadio(),2);
-		OC.~VectorT();
-		return resolverSegundoGrado(a,b,c);
+		return resolverSegundoGrado(a,b,c);	//Se devuelve el resultado de la ecuación.
 }
 
 /*
@@ -262,13 +279,13 @@ VectorT interseccion(Rayo ray, Esfera esfera) {
 VectorT resolverSegundoGrado(float a,float b, float c) {
 
 		float delta = pow(b,2) - 4*a*c;
-		if (delta<0.0) {
+		if (delta<0.0) {	//Si delta es negativo no s epuede obtener solución.
 			float sol[] = {-infinito};
 			return VectorT(sol,0);
-		} else if(delta == 0.0) {
+		} else if(delta == 0.0) {	//Solo se tiene una solución.
 			float sol[] = {-b/(2*a)};
 			return VectorT(sol,1);
-		} else {
+		} else {	//Se obtienen las soluciones d ela ecuación.
 			float raiz = sqrt(delta);
 			float sol[] = {(-b-raiz)/(2*a), (-b+raiz)/(2*a)};
 			return VectorT(sol,2);
@@ -310,8 +327,8 @@ void leerFichero(){
 				color[0] = stof(strtok(NULL,"*"))/255;
 				color[1] = stof(strtok(NULL,"*"))/255;
 				color[2] = stof(strtok(NULL,"*"))/255;
-				ks = stof(strtok(NULL,"*"));
-				alpha = stof(strtok(NULL,"*"));
+				ks = stof(strtok(NULL,"*"));	//Se lee el coeficiente especular.
+				alpha = stof(strtok(NULL,"*"));	//Se lee el alpha.
 				// Creamos la esfera y la introducimos en la lista.
 				Esfera esfera = Esfera(VectorT(centro,3),radio,VectorT(color,3),material,ior);
 				esfera.setAlpha(alpha);
@@ -362,6 +379,7 @@ void leerFichero(){
  * Función que escribe en el fichero el color del pixel.
  */
 void escribirColor(){
+	//Se recorre el buffer.
 	for(int i = 0; i < (int)(altura/tamPixel+0.5); i++) {
 		for(int j = 0; j < (int)(anchura/tamPixel+0.5)*3; j++) {
 			// Escribimos el color del píxel.
@@ -395,7 +413,8 @@ VectorT phong(Rayo rayoSombra, VectorT normal, VectorT direccionV, Esfera esfera
 		// Se obtiene Wr.
 		VectorT Wr = rayoSombra.getDireccion() - (rayoSombra.getDireccion()-normal*
 				(rayoSombra.getDireccion().prodEscalar(normal)))*2;
-		direccionV = direccionV/direccionV.modulo();	// Se normaliza el vector dirección de la cámara.
+		// Se normaliza el vector dirección de la cámara.
+		direccionV = direccionV/direccionV.modulo();
 		float prod = direccionV.prodEscalar(Wr);	// Producto entre dirección y Wr.
 		if(prod < 0) {	//Se obtiene su valor absoluto.
 			prod = -prod;
@@ -412,32 +431,36 @@ VectorT phong(Rayo rayoSombra, VectorT normal, VectorT direccionV, Esfera esfera
 }
 
 /*
- * Método que devuelve el color reflejado.
+ * Método que devuelve el color reflejado por una esfera.
  */
 void reflection(VectorT camara, int rebote, VectorT normal, VectorT punto
 		, float &R, float &G, float &B) {
-	float cos = normal.prodEscalar(camara);
-	VectorT reflejo = camara - normal*cos*2;
-	trazarRayos(Rayo(&punto,&reflejo), rebote+1, R, G, B, false);
+	float cos = normal.prodEscalar(camara);		//Se calcula el coseno.
+	VectorT reflejo = camara - normal*cos*2;	//Se obtiene la dirección del reflejo.
+	//Se traza el rayo reflejado.
+	trazarRayos(Rayo(punto,reflejo), rebote+1, R, G, B, false);
 }
 
 /*
- * Método que devuelve el color refractado.
+ * Método que devuelve el color refractado por una esfera.
  */
 void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto,
 		Esfera esfera, float nuevoIndice, float &R, float &G, float &B) {
 	float factor;
-	float aux = IRefraccion;
+	float aux = IRefraccion;	//Se guarda el indice actual.
+	//Se calcula el coseno entre la normal y el rayo
 	float cos = normal.prodEscalar(direccionRayo);
 	if(cos < 0) {
 		cos = -cos;
-		factor = IRefraccion/nuevoIndice;
+		factor = IRefraccion/nuevoIndice;	//Se divide el indice actual entre el nuevo.
+		//Se intercambian los indices.
 		IRefAnterior = IRefraccion;
 		IRefraccion = nuevoIndice;
 	} else {		//Sale de la esfera.
 		factor = IRefAnterior/IRefraccion;
 		IRefraccion = IRefAnterior;
 	}
+	//Se calcula el rayo refractado.
 	float c2 = 1 - factor*factor*(1 - cos*cos);
 	VectorT direccion;
 	if(c2 < 0) {
@@ -447,7 +470,9 @@ void refraction(VectorT direccionRayo, int rebote, VectorT normal, VectorT punto
 				normal*(sqrt(c2));
 		direccion = direccion/direccion.modulo();
 	}
-	trazarRayos(Rayo(&punto,&direccion), rebote+1, R, G, B, false);
+	//Se traza el rayo.
+	trazarRayos(Rayo(punto,direccion), rebote+1, R, G, B, false);
+	//Una vez acabado se recupera el indice anterior.
 	IRefraccion = aux;
 }
 
@@ -474,14 +499,16 @@ void indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCam, 
 		// Lanzamos el rayo para calcular el color.
 		VectorT direccion = coordenadasMundo.trasponer().getFila(0);
 		direccion = direccion / direccion.modulo();
-		Rayo rayo = Rayo(&punto,&direccion);
+		Rayo rayo = Rayo(punto,direccion);
 		trazarRayos(rayo, rebote+1, R, G, B,true);
 		float color[3] = {R, G, B};
 		VectorT luzDevuelta = VectorT(color,3);
+		//Se aplica la BRDF de Phong.
 		VectorT p = phong(rayo, normal, dirCam, esfera, esfera.getMaterial()==PHONG);
 		luzDevuelta.setValPos(p.getValPos(0)*luzDevuelta.getValPos(0),0);
 		luzDevuelta.setValPos(p.getValPos(1)*luzDevuelta.getValPos(1),1);
 		luzDevuelta.setValPos(p.getValPos(2)*luzDevuelta.getValPos(2),2);
+		//Se calcula el seno y coseno de theta.
 		float coseno = cosf(theta);
 		float cosenoAbsoluto = coseno;
 		if(coseno < 0) {
@@ -492,12 +519,14 @@ void indirectLight(VectorT punto, VectorT normal,Esfera esfera, VectorT dirCam, 
 		if(seno < 0) {
 			senoAbsoluto = -seno;
 		}
+		//Se obtiene la luz aportada por el rayo indirecto.
 		luzDevuelta = (luzDevuelta*cosenoAbsoluto*senoAbsoluto)/(seno*coseno/PI);
 		// Metemos en luz total la aportación captada por el rayo.
 		luzIndirecta = luzIndirecta + luzDevuelta;
 	}
 	// Calculamos la media de la contribución de cada color.
 	luzIndirecta = luzIndirecta / rayosIndirecta;
+	//se guardan los valores.
 	Rind = luzIndirecta.getValPos(0);
 	Gind = luzIndirecta.getValPos(1);
 	Bind = luzIndirecta.getValPos(2);
@@ -517,14 +546,6 @@ Matriz sistemaCoordenadas(VectorT normal){
 	VectorT vectorV = normal.prodVectorial(vectorU);
 	vectorV = vectorV / vectorV.modulo();
 	VectorT vectorSistema[3] = {vectorU, vectorV, normal};
-	/*float prodEscalar = vectorU.prodEscalar(vectorV);
-	cout << prodEscalar << endl;
-	cout << "Vector1: " << normal.getValPos(0) << " " << normal.getValPos(1) << " " << normal.getValPos(2);
-	cout << endl;
-	cout << "Vector2: " << vectorV.getValPos(0) << " " << vectorV.getValPos(1) << " " << vectorV.getValPos(2);
-	cout << endl;
-	cout << "Vector3: " << vectorU.getValPos(0) << " " << vectorU.getValPos(1) << " " << vectorU.getValPos(2);
-	cout << endl;*/
 	// Creamos la matriz con el sistema de coordenadas.
 	Matriz sistema = Matriz(vectorSistema,3);
 	sistema = sistema.trasponer();	// Se traspone la matriz para tener vectores columna.
@@ -541,6 +562,7 @@ Matriz uniformeSemiesfera(float theta, float phi){
 	float x = sinf(theta)*cosf(phi);
 	float y = sinf(theta)*sinf(phi);
 	float z = cosf(theta);
+	//Se crea el vector.
 	float *vector = new float[3];
 	vector[0] = x; vector[1] = y; vector[2] = z;
 	VectorT coordenadas(vector,3);
