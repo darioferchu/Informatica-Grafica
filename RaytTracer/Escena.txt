@@ -1,0 +1,10 @@
+0.001*1*1*0.5*0.5*0			//Tamaño pixel, 2*tamaño plano y 3*observador
+Luz*0.5*0.6*2.3*1				//Foco luz(3*posicion,potencia)
+Esfera*101*0.5*2*100*3*0*127*0			//Pared derecha(3*posicion,radio,tipo,3*color)
+Esfera*0.5*101*2*100*3*127*127*127			//Pared arriba(3*posicion,radio,tipo,3*color)
+Esfera*-100*0.5*2*100*3*127*0*0			//Pared izquierda(3*posicion,radio,3*color)
+Esfera*0.5*-100*2*100*3*127*127*127			//Pared abajo(3*posicion,radio,tipo,3*color)
+Esfera*0.5*0.5*103.5*100*3*127*127*127			//Pared fondo(3*posicion,radio,tipo,3*color)
+Esfera*0.5*0.5*-100.01*100*3*0*0*0		//Pared fondo(3*posicion,radio,tipo,3*color)
+Esfera*0.2*0.1*2.8*0.1*2*1.5		//Refractada(3*posicion,radio,tipo,indice)
+Esfera*0.7*0.15*2.6*0.15*0*0*0*127*0.8*100			//Phong(3*posicion,radio,tipo,3*color)
