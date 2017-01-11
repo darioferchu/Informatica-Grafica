@@ -134,55 +134,6 @@ bool PhotonMapping::trace_ray(const Ray& r, const Vector3 &p,
 //---------------------------------------------------------------------
 void PhotonMapping::preprocess()
 {
-	//Se crean listas de fotones.
-	std::list<Photon> global_photons;
-	std::list<Photon> caustic_photons;
-	//Se obtiene una lista de las luces
-	std::vector<LightSource*> lights = world->light_source_list;
-	for (int i = 0; i < static_cast<int>(lights.size()); i++) {
-		LightSource *light = lights.at(i);
-		//Se obtiene posicion de la luz actual.
-		Vector3 origin = light->get_position();
-		Ray ray;
-		do {
-			//Se calcula direccion aleatoria.
-			Real randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			Real randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			Real randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			while (pow(randomX, 2) + pow(randomY, 2) + pow(randomZ, 2) > 1) {
-				randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-				randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-				randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			}
-			Vector3 direction = Vector3(randomX, randomY, randomZ);
-			direction = direction.normalize();
-			//Se crea y lanza el rayo.
-			ray = Ray(origin, direction);
-		} while (trace_ray(ray, light->get_intensities(), global_photons, caustic_photons, false));
-	}
-	//Se guardan los fotones en el KD-Tree.
-	list<Photon>::iterator fotones = global_photons.begin();
-	for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {
-		Photon foton = *fotones;
-		std::vector<Real> direction = std::vector<Real>();
-		direction.push_back(foton.direction.data[0]);
-		direction.push_back(foton.direction.data[1]);
-		direction.push_back(foton.direction.data[2]);
-		m_global_map.store(direction, foton);
-		m_global_map.balance();
-		*fotones++;
-	}
-	fotones = caustic_photons.begin();
-	for (int i = 0; i < static_cast<int>(caustic_photons.size()); i++) {
-		Photon foton = *fotones;
-		std::vector<Real> direction = std::vector<Real>();
-		direction.push_back(foton.direction.data[0]);
-		direction.push_back(foton.direction.data[1]);
-		direction.push_back(foton.direction.data[2]);
-		m_caustics_map.store(direction, foton);
-		m_caustics_map.balance();
-		*fotones++;
-	}
 }
 
 //*********************************************************************
@@ -200,31 +151,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 {
 	Vector3 L(0);
 	Intersection it(it0);
-	Vector3 position = it.get_position();
-	std::vector<Real> p = std::vector<Real>();
-	int dist = 0;
-	//m_global_map.find(p, m_nb_photons, dist);
-	
 
-	//Luz Directa
-	Vector3 directa = Vector3(0,0,0);
-	std::vector<LightSource*> lights = world->light_source_list;
-	for (int i = 0; i < static_cast<int>(lights.size()); i++) {
-		LightSource *light = lights.at(i);
-
-		//BRDF
-		Vector3 dirSombra = it.get_position() - light->get_position();
-		Vector3 Kd = it.intersected()->material()->get_albedo(it);
-		Vector3 Wr = dirSombra - (dirSombra - it.get_normal()*
-			(dirSombra.dot(it.get_normal()))) * 2;
-		Vector3 direccionCam = it.get_position() - world->get_ambient();
-		direccionCam.normalize();
-		float prod = direccionCam.dot_abs(Wr);
-		float specular = (it.intersected()->material()->get_specular(it));//Resto de calclos no se pueden sin alpha.
-		directa = directa + Kd + specular;
-		//BRDF
-	}
-	
 	//**********************************************************************
 	// The following piece of code is included here for two reasons: first
 	// it works as a 'hello world' code to check that everthing compiles 
@@ -273,6 +200,6 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	}
 	// End of exampled code
 	//**********************************************************************
-	
+
 	return L;
 }
