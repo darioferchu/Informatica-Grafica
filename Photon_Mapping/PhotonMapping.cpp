@@ -234,15 +234,17 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		std::vector<LightSource*> lights = world->light_source_list;
 		for (int i = 0; i < static_cast<int>(lights.size()); i++) {
 			LightSource *light = lights.at(i);
-			//BRDF 
-			Vector3 dirSombra = light->get_incoming_direction(it.get_position());
-			Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
-						(dirSombra.dot(it.get_normal()))) * 2;
-			float prod = direccionCam.dot_abs(Wr);
-			//Resto de calclos no se pueden sin alpha. 
-			Vector3 brdf = Kd/3.14159 + specular*((10 + 2)/(2*3.14159))*pow(prod,10);
-			//BRDF
-			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
+			if(light->is_visible(it.get_position())) {
+				//BRDF 
+				Vector3 dirSombra = light->get_incoming_direction(it.get_position());
+				Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
+					(dirSombra.dot(it.get_normal()))) * 2;
+				float prod = direccionCam.dot_abs(Wr);
+				//Resto de calclos no se pueden sin alpha. 
+				Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
+				//BRDF
+				directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
+			}
 		}
 		// Sumar aportación de ambas.
 		return directa + indirecta;
