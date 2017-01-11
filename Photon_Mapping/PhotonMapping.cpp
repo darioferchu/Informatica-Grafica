@@ -198,29 +198,36 @@ void PhotonMapping::preprocess()
 //---------------------------------------------------------------------
 Vector3 PhotonMapping::shade(Intersection &it0)const
 {
+	Vector3 L(0);
+	Intersection it(it0);
+	Vector3 direccionCam = it.get_position() - world->get_ambient();
+	direccionCam.normalize();
 	if(it.intersected()->material()->is_delta()){
 
 	} else{
-		Vector3 L(0);
-		Intersection it(it0);
 		Vector3 position = it.get_position();
 		Vector3 Kd = it.intersected()->material()->get_albedo(it);
 		float specular = (it.intersected()->material()->get_specular(it));
-		std::vector<Real> p = std::vector<Real>();
-		int radio = 0;
-		std::vector<Node> nodes;
-		m_global_map.find(p, m_nb_photons, nodes, radio); 
-
+		/*std::vector<Real> p = std::vector<Real>();
+		Real dist = 0;
+		std::vector<const KDTree<Photon, 3>::Node*> nodes;
+		m_global_map.find(p, m_nb_photons, nodes, dist);*/
 		// Luz del mapa
-		Real flujo = 0.0;
-		for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
-			Node *foton = nodes.at(i);
-			flujo += ;// Sacamos la potencia del fotón.
-			Real brdf = ;	// Multiplicamos por BRDF.
+		Vector3 indirecta = Vector3(0,0,0);
+		/*for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
+			const KDTree<Photon, 3>::Node *foton = nodes.at(i);
+			Vector3 flujo = foton->data().flux;
+			//BRDF
+			Vector3 dirSombra = it.get_position() - foton->data().position;
+			Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
+				(dirSombra.dot(it.get_normal()))) * 2;
+			//Resto de calclos no se pueden sin alpha. 
+			Vector3 brdf = Kd + specular;
+			indirecta += brdf;	// Sumamos BRDF.
 		}
 		// Aplicamos el filtro de cono.
-		Real denominador = 3.14159265 * pow(radio, 2);
-		Real radiancia = brdf / denominador;
+		Real denominador = 3.14159265 * pow(dist, 2);
+		indirecta = indirecta / denominador;*/
 
 		//Luz Directa 
 		Vector3 directa = Vector3(0, 0, 0);
@@ -228,18 +235,17 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		for (int i = 0; i < static_cast<int>(lights.size()); i++) {
 			LightSource *light = lights.at(i);
 			//BRDF 
-			Vector3 dirSombra = it.get_position() - light->get_position();
+			Vector3 dirSombra = light->get_incoming_direction(it.get_position());
 			Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
 						(dirSombra.dot(it.get_normal()))) * 2;
-			Vector3 direccionCam = it.get_position() - world->get_ambient();
-			direccionCam.normalize();
 			float prod = direccionCam.dot_abs(Wr);
 			//Resto de calclos no se pueden sin alpha. 
-			directa = directa + Kd + specular;
-			//BRDF 
+			Vector3 brdf = Kd/3.14159 + specular*((10 + 2)/(2*3.14159))*pow(prod,10);
+			//BRDF
+			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
 		}
-
 		// Sumar aportación de ambas.
+		return directa + indirecta;
 
 	}
 	
