@@ -203,12 +203,15 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Vector3 direccionCam = it.get_position() - world->get_ambient();
 	direccionCam.normalize();
 	if(it.intersected()->material()->is_delta()){
-		while (it.intersected()->material()->is_delta()) {
+		while (it.did_hit() && it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
 			Vector3 y = it.get_ray().get_direction();
-			cout << y[0] << " " << y[1] << " " << y[2] << "\n";
+			//cout << y[0] << " " << y[1] << " " << y[2] << "\n";
 			it.intersected()->material()->get_outgoing_sample_ray(it, r, x);
 			world->first_intersection(r, it);
+		}
+		if (!it.did_hit()) {
+			return world->get_background();
 		}
 	}
 	Vector3 position = it.get_position();
