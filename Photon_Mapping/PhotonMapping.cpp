@@ -201,19 +201,23 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Vector3 L(0);
 	Intersection it(it0);
 	Vector3 direccionCam = it.get_position() - world->get_ambient();
-	direccionCam.normalize();
 	if(it.intersected()->material()->is_delta()){
-		while (it.did_hit() && it.intersected()->material()->is_delta()) {
+		int rebote = 0;
+		while (rebote < 50 && it.did_hit() && it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
+			Vector3 posicionObservador = it.get_position();
 			Vector3 y = it.get_ray().get_direction();
 			//cout << y[0] << " " << y[1] << " " << y[2] << "\n";
 			it.intersected()->material()->get_outgoing_sample_ray(it, r, x);
 			world->first_intersection(r, it);
+			direccionCam = posicionObservador - it.get_position();
+			rebote++;
 		}
 		if (!it.did_hit()) {
 			return world->get_background();
 		}
 	}
+	direccionCam.normalize();
 	Vector3 position = it.get_position();
 	Vector3 Kd = it.intersected()->material()->get_albedo(it);
 	float specular = (it.intersected()->material()->get_specular(it));
