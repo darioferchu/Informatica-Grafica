@@ -134,16 +134,16 @@ bool PhotonMapping::trace_ray(const Ray& r, const Vector3 &p,
 //---------------------------------------------------------------------
 void PhotonMapping::preprocess()
 {
-	//Se crean listas de fotones.
+	// Se crean listas de fotones.
 	std::list<Photon> global_photons;
 	std::list<Photon> caustic_photons;
-	//Se obtiene una lista de las luces
+	// Se obtiene una lista de las luces
 	std::vector<LightSource*> lights = world->light_source_list;
-	for (int i = 0; i < static_cast<int>(lights.size()); i++) {
-		LightSource *light = lights.at(i);
-		//Se obtiene posicion de la luz actual.
-		Vector3 origin = light->get_position();
-		Ray ray;
+
+	for (int i = 0; i < static_cast<int>(lights.size()); i++) {		// Se recorren las luces.
+		LightSource *light = lights.at(i);		// Se obtiene la luz actual.
+		Vector3 origin = light->get_position(); //Se obtiene posicion de la luz actual.
+		Ray ray;		// Se declara el rayo.
 		do {
 			//Se calcula direccion aleatoria.
 			Real randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
@@ -154,35 +154,36 @@ void PhotonMapping::preprocess()
 				randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
 				randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
 			}
-			Vector3 direction = Vector3(randomX, randomY, randomZ);
-			direction = direction.normalize();
+			Vector3 direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
+			direction = direction.normalize();		// Se normaliza.
 			//Se crea y lanza el rayo.
-			ray = Ray(origin, direction);
+			ray = Ray(origin, direction);		// Se crea y lanza el rayo.
 		} while (trace_ray(ray, light->get_intensities(), global_photons, caustic_photons, false));
 	}
+
 	//Se guardan los fotones en el KD-Tree.
-	list<Photon>::iterator fotones = global_photons.begin();
-	for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {
-		Photon foton = *fotones;
-		std::vector<Real> direction = std::vector<Real>();
-		direction.push_back(foton.direction.data[0]);
-		direction.push_back(foton.direction.data[1]);
-		direction.push_back(foton.direction.data[2]);
-		m_global_map.store(direction, foton);
-		m_global_map.balance();
-		*fotones++;
+	list<Photon>::iterator fotones = global_photons.begin();		// Se crea el iterador.
+	for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {		// Se recorren los fotones.
+		Photon foton = *fotones;		// Se obtiene el fotón actual.
+		std::vector<Real> direction = std::vector<Real>();	// Vector para la dirección.
+		direction.push_back(foton.position.getComponent(0));
+		direction.push_back(foton.position.getComponent(1));
+		direction.push_back(foton.position.getComponent(2));
+		m_global_map.store(direction, foton);	// Se almacena el fotón.
+		*fotones++;		// Se pasa al siguiente fotón.
 	}
-	fotones = caustic_photons.begin();
-	for (int i = 0; i < static_cast<int>(caustic_photons.size()); i++) {
-		Photon foton = *fotones;
-		std::vector<Real> direction = std::vector<Real>();
-		direction.push_back(foton.direction.data[0]);
-		direction.push_back(foton.direction.data[1]);
-		direction.push_back(foton.direction.data[2]);
-		m_caustics_map.store(direction, foton);
-		m_caustics_map.balance();
-		*fotones++;
+	m_global_map.balance();
+	fotones = caustic_photons.begin();		// Se crea el iterador.
+	for (int i = 0; i < static_cast<int>(caustic_photons.size()); i++) {		// Se recorren los fotones.
+		Photon foton = *fotones;		// Se obtiene el fotón actual.
+		std::vector<Real> direction = std::vector<Real>();		// Vector para la dirección.
+		direction.push_back(foton.position.getComponent(0));
+		direction.push_back(foton.position.getComponent(1));
+		direction.push_back(foton.position.getComponent(2));
+		m_caustics_map.store(direction, foton);		// Se almacena el fotón.	
+		*fotones++;		// Se pasa al siguiente fotón.
 	}
+	m_caustics_map.balance();
 }
 
 //*********************************************************************
@@ -203,7 +204,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Vector3 direccionCam = it.get_position() - world->get_ambient();
 	if(it.intersected()->material()->is_delta()){
 		int rebote = 0;
-		while (rebote < 50 && it.did_hit() && it.intersected()->material()->is_delta()) {
+		while (it.did_hit() & rebote < 50 & it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
 			Vector3 posicionObservador = it.get_position();
 			Vector3 y = it.get_ray().get_direction();
@@ -221,13 +222,14 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Vector3 position = it.get_position();
 	Vector3 Kd = it.intersected()->material()->get_albedo(it);
 	float specular = (it.intersected()->material()->get_specular(it));
-	/*std::vector<Real> p = std::vector<Real>();
+	std::vector<Real> p = {it.get_position().getComponent(0),it.get_position().getComponent(1),
+		it.get_position().getComponent(2)};
 	Real dist = 0;
-	std::vector<const KDTree<Photon, 3>::Node*> nodes;
-	m_global_map.find(p, m_nb_photons, nodes, dist);*/
+	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
+	m_global_map.find(p, m_nb_photons, nodes, dist);
 	// Luz del mapa
 	Vector3 indirecta = Vector3(0,0,0);
-	/*for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
+	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
 		const KDTree<Photon, 3>::Node *foton = nodes.at(i);
 		Vector3 flujo = foton->data().flux;
 		//BRDF
@@ -235,12 +237,14 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
 			(dirSombra.dot(it.get_normal()))) * 2;
 		//Resto de calclos no se pueden sin alpha. 
-		Vector3 brdf = Kd + specular;
-		indirecta += brdf;	// Sumamos BRDF.
+		float prod = direccionCam.dot_abs(Wr);
+		//Resto de calclos no se pueden sin alpha. 
+		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
+		indirecta += brdf*flujo;	// Sumamos BRDF.
 	}
 	// Aplicamos el filtro de cono.
 	Real denominador = 3.14159265 * pow(dist, 2);
-	indirecta = indirecta / denominador;*/
+	indirecta = indirecta / denominador;
 
 	//Luz Directa 
 	Vector3 directa = Vector3(0, 0, 0);
