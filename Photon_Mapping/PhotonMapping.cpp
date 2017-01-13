@@ -16,7 +16,7 @@ In no event shall copyright holders be liable for any damage.
 #include "Intersection.h"
 #include "Ray.h"
 #include "BSDF.h"
-#include "BSDF.h"
+#include <random>
 
 //*********************************************************************
 // Compute the photons by tracing the Ray 'r' from the light source
@@ -135,6 +135,10 @@ bool PhotonMapping::trace_ray(const Ray& r, const Vector3 &p,
 //---------------------------------------------------------------------
 void PhotonMapping::preprocess()
 {
+
+	default_random_engine random;
+	uniform_real_distribution<float> distribution(-1.0, 1.0);
+
 	// Se crean listas de fotones.
 	std::list<Photon> global_photons;
 	std::list<Photon> caustic_photons;
@@ -147,19 +151,19 @@ void PhotonMapping::preprocess()
 		Ray ray;		// Se declara el rayo.
 		do {
 			//Se calcula direccion aleatoria.
-			Real randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			Real randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-			Real randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
+			Real randomX = distribution(random);
+			Real randomY = distribution(random);
+			Real randomZ = distribution(random);
 			while (pow(randomX, 2) + pow(randomY, 2) + pow(randomZ, 2) > 1) {
-				randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-				randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
-				randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
+				randomX = distribution(random);
+				randomY = distribution(random);
+				randomZ = distribution(random);
 			}
 			Vector3 direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
 			direction = direction.normalize();		// Se normaliza.
 			//Se crea y lanza el rayo.
 			ray = Ray(origin, direction);		// Se crea y lanza el rayo.
-		} while (trace_ray(ray, light->get_intensities(), global_photons, caustic_photons, false));
+		} while (trace_ray(ray, light->get_intensities()/m_max_nb_shots, global_photons, caustic_photons, false));
 	}
 
 	//Se guardan los fotones en el KD-Tree.
@@ -234,17 +238,15 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		it.get_position().getComponent(2)};
 	Real dist = 0;
 	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
-	m_global_map.find(p, 500, nodes, dist);
+	m_global_map.find(p, 200, nodes, dist);
 	// Luz del mapa
 	Vector3 indirecta = Vector3(0,0,0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
 		const KDTree<Photon, 3>::Node *foton = nodes.at(i);
 		Vector3 flujo = foton->data().flux;
 		//BRDF
-		Vector3 dirSombra = it.get_position() - foton->data().position;
-		dirSombra = dirSombra.normalize();
-		Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
-			(dirSombra.dot(it.get_normal()))) * 2;
+		Vector3 Wr = Vector3(0, 0, 0);
+		Wr = Wr.reflect(it.get_normal());
 		//Resto de calclos no se pueden sin alpha. 
 		float prod = direccionCam.dot_abs(Wr);
 		//Resto de calclos no se pueden sin alpha. 
@@ -264,7 +266,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	p = { it.get_position().getComponent(0),it.get_position().getComponent(1),
 		it.get_position().getComponent(2) };
 	nodes = std::vector<const KDTree<Photon, 3U>::Node*>();
-	m_caustics_map.find(p, 500, nodes, dist);
+	m_caustics_map.find(p, 200, nodes, dist);
 	// Luz del mapa de cáusticas.
 	Vector3 causticas = Vector3(0, 0, 0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
@@ -308,6 +310,9 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
 		}
 	}
+	//indirecta = (0, 0, 0);
+	//causticas = (0, 0, 0);
+	//directa = (0, 0, 0);
 	// Sumar aportación de ambas.
 	return directa+indirecta+causticas;
 
