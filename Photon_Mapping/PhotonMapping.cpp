@@ -16,6 +16,7 @@ In no event shall copyright holders be liable for any damage.
 #include "Intersection.h"
 #include "Ray.h"
 #include "BSDF.h"
+#include "BSDF.h"
 
 //*********************************************************************
 // Compute the photons by tracing the Ray 'r' from the light source
@@ -207,12 +208,17 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		int rebotes = 0;
 		while (it.did_hit() && rebotes < 50 && it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
+			Vector3 normal = it.get_normal();
 			it.intersected()->material()->get_outgoing_sample_ray(it, r, x);
-			/*if (it.intersected()->material()->get_specular(it) > 0) {
-				r = Ray(r.get_origin() + it.get_normal()*0.001, r.get_direction());
-				world->first_intersection(r, it);
-			}*/
 			world->first_intersection(r, it);
+			if (it.did_hit()) {
+				Vector3 aux = r.get_origin() - it.get_position();
+				Real dist = sqrtf(pow(aux.getComponent(0), 2) + pow(aux.getComponent(1), 2) + pow(aux.getComponent(2), 2));
+				if (dist < 0.0001) {
+					r = Ray(r.get_origin() + normal*0.001, r.get_direction());
+					world->first_intersection(r, it);
+				}
+			} 
 			direccionCam = r.get_direction();
 			direccionCam = direccionCam.normalize();
 			rebotes++;
@@ -228,7 +234,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		it.get_position().getComponent(2)};
 	Real dist = 0;
 	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
-	m_global_map.find(p, 200, nodes, dist);
+	m_global_map.find(p, 500, nodes, dist);
 	// Luz del mapa
 	Vector3 indirecta = Vector3(0,0,0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
@@ -258,7 +264,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	p = { it.get_position().getComponent(0),it.get_position().getComponent(1),
 		it.get_position().getComponent(2) };
 	nodes = std::vector<const KDTree<Photon, 3U>::Node*>();
-	m_caustics_map.find(p, 200, nodes, dist);
+	m_caustics_map.find(p, 500, nodes, dist);
 	// Luz del mapa de cáusticas.
 	Vector3 causticas = Vector3(0, 0, 0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
