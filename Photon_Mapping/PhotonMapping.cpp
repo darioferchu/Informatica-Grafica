@@ -142,10 +142,10 @@ void PhotonMapping::preprocess()
 
 	for (int i = 0; i < static_cast<int>(lights.size()); i++) {		// Se recorren las luces.
 		LightSource *light = lights.at(i);		// Se obtiene la luz actual.
-		Vector3 origin = light->get_position(); //Se obtiene posicion de la luz actual.
+		Vector3 origin = light->get_position(); // Se obtiene posicion de la luz actual.
 		Ray ray;		// Se declara el rayo.
 		do {
-			//Se calcula direccion aleatoria.
+			// Se calcula dirección aleatoria.
 			Real randomX = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
 			Real randomY = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
 			Real randomZ = static_cast<Real>(rand()) / static_cast<Real>(RAND_MAX);
@@ -156,12 +156,11 @@ void PhotonMapping::preprocess()
 			}
 			Vector3 direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
 			direction = direction.normalize();		// Se normaliza.
-			//Se crea y lanza el rayo.
 			ray = Ray(origin, direction);		// Se crea y lanza el rayo.
 		} while (trace_ray(ray, light->get_intensities(), global_photons, caustic_photons, false));
 	}
 
-	//Se guardan los fotones en el KD-Tree.
+	// Se guardan los fotones en el KD-Tree.
 	list<Photon>::iterator fotones = global_photons.begin();		// Se crea el iterador.
 	for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {		// Se recorren los fotones.
 		Photon foton = *fotones;		// Se obtiene el fotón actual.
@@ -199,97 +198,104 @@ void PhotonMapping::preprocess()
 //---------------------------------------------------------------------
 Vector3 PhotonMapping::shade(Intersection &it0)const
 {
-	Vector3 L(0);
+	Vector3 L(0);		// Se declaran las bariables.
 	Intersection it(it0);
+
+	// Se obtiene la dirección a la cámara.
 	Vector3 direccionCam = it.get_position() - world->get_ambient();
-	direccionCam = direccionCam.normalize();
-	if(it.intersected()->material()->is_delta()){
-		int rebotes = 0;
-		while (it.did_hit() && rebotes < 50 && it.intersected()->material()->is_delta()) {
+	direccionCam = direccionCam.normalize();		// Se normaliza.
+
+	if(it.intersected()->material()->is_delta()){	// Si el material es delta se realizan rebotes.
+		int rebote = 0;		// Variable para limitar él número de rebotes.
+		while (it.did_hit() && rebote < 50 && it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
+			// Se lanza el rayo y se mira la intersección.
 			it.intersected()->material()->get_outgoing_sample_ray(it, r, x);
-			/*if (it.intersected()->material()->get_specular(it) > 0) {
-				r = Ray(r.get_origin() + it.get_normal()*0.001, r.get_direction());
-				world->first_intersection(r, it);
-			}*/
 			world->first_intersection(r, it);
-			direccionCam = r.get_direction();
+			direccionCam = r.get_origin();
 			direccionCam = direccionCam.normalize();
-			rebotes++;
+			rebote++;
 		}
-		if (!it.did_hit()) {
+		if (!it.did_hit()) {		// Si no choca con nada se devuelve color de fondo.
 			return world->get_background();
 		}
 	}
-	Vector3 Kd = it.intersected()->material()->get_albedo(it);
-	float specular = (it.intersected()->material()->get_specular(it));
+
+	Vector3 position = it.get_position();		// Se obtiene la posición actual.
+	Vector3 Kd = it.intersected()->material()->get_albedo(it);	// Se obtiene el coeficiente difuso.
+	float specular = (it.intersected()->material()->get_specular(it));	// Se obtiene coeficiente especular.
 	std::vector<Real> p = {it.get_position().getComponent(0),it.get_position().getComponent(1),
-		it.get_position().getComponent(2)};
+		it.get_position().getComponent(2)};		// Se crea el vector con la posición.
 	Real dist = 0;
 	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
-	m_global_map.find(p, 200, nodes, dist);
-	// Luz del mapa
+	m_global_map.find(p, 100, nodes, dist);		// se obtienen los fotones más cercanos.
+
+	// Luz del mapa global.
 	Vector3 indirecta = Vector3(0,0,0);
-	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
+	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {	// Sumar aportación de cada fotón.
 		const KDTree<Photon, 3>::Node *foton = nodes.at(i);
-		Vector3 flujo = foton->data().flux;
-		//BRDF
+		Vector3 flujo = foton->data().flux;		// Se obtiene el flujo.
+		// Se aplica la BRDF.
 		Vector3 dirSombra = it.get_position() - foton->data().position;
 		dirSombra = dirSombra.normalize();
 		Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
 			(dirSombra.dot(it.get_normal()))) * 2;
-		//Resto de calclos no se pueden sin alpha. 
 		float prod = direccionCam.dot_abs(Wr);
-		//Resto de calclos no se pueden sin alpha. 
+		// Se calcula el valor final de la BRDF. 
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-		indirecta = indirecta + brdf*flujo;	// Sumamos BRDF.
+		Real wp = 0.0;
+		Vector3 d = it.get_position() - foton->point().;
+		Real dk = d/(1*dist);
+		if (wp > dk) {
+			wp = dk;
+		}
+		indirecta += brdf*flujo*wp;	// Aplicamos flujo y BRDF.
 	}
 	// Aplicamos el filtro de cono.
-	Real denominador = 3.14159265 * pow(dist, 2);
-	indirecta = indirecta / denominador;
+	Real denominador = (1-(2/3*1))*3.14159265 * pow(dist, 2);
+	indirecta = indirecta * denominador;
 
-	p = { it.get_position().getComponent(0),it.get_position().getComponent(1),
-		it.get_position().getComponent(2) };
-	nodes = std::vector<const KDTree<Photon, 3U>::Node*>();
-	m_caustics_map.find(p, 200, nodes, dist);
-	// Luz del mapa
+	m_caustics_map.find(p, 100, nodes, dist);
+	// Luz del mapa de cáusticas.
 	Vector3 causticas = Vector3(0, 0, 0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
 		const KDTree<Photon, 3>::Node *foton = nodes.at(i);
-		Vector3 flujo = foton->data().flux;
-		//BRDF
+		Vector3 flujo = foton->data().flux;		// Se obtiene el flujo.
+		//Se aplica la BRDF.
 		Vector3 dirSombra = it.get_position() - foton->data().position;
 		dirSombra = dirSombra.normalize();
 		Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
 			(dirSombra.dot(it.get_normal()))) * 2;
-		//Resto de calclos no se pueden sin alpha. 
 		float prod = direccionCam.dot_abs(Wr);
-		//Resto de calclos no se pueden sin alpha. 
+		// Se calcula el valor final de la BRDF.
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-		causticas = causticas + brdf*flujo;	// Sumamos BRDF.
+		causticas += brdf*flujo;	// Aplicamos flujo y BRDF.
 	}
 	// Aplicamos el filtro de cono.
-	denominador = 3.14159265 * pow(dist, 2);
 	causticas = causticas / denominador;
-	//Luz Directa 
+
+	indirecta = indirecta + causticas;	// Se juntan las dos aportaciones.
+
+	// Luz Directa 
 	Vector3 directa = Vector3(0, 0, 0);
 	std::vector<LightSource*> lights = world->light_source_list;
-	for (int i = 0; i < static_cast<int>(lights.size()); i++) {
+	for (int i = 0; i < static_cast<int>(lights.size()); i++) {		// Se recorren todas las luces.
 		LightSource *light = lights.at(i);
-		if(light->is_visible(it.get_position())) {
-			//BRDF 
+		if(light->is_visible(it.get_position())) {		// Se mira si es visible.
+			// Calculamos la BRDF. 
 			Vector3 dirSombra = light->get_incoming_direction(it.get_position());
 			Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
 				(dirSombra.dot(it.get_normal()))) * 2;
 			float prod = direccionCam.dot_abs(Wr);
-			//Resto de calclos no se pueden sin alpha. 
+			// Obtenemos el valor final de la BRDF.
 			Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-			//BRDF
-			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
+			float cos = dirSombra.dot(it.get_normal());
+			directa = directa + light->get_incoming_light(it.get_position())*brdf*cos;
 		}
 	}
+	indirecta = Vector3(0, 0, 0);
 	// Sumar aportación de ambas.
-	return directa+indirecta+causticas;
+	return directa + indirecta;
 
 	
 	//**********************************************************************
@@ -299,7 +305,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	// will need when doing the work. Goes without saying: remove the 
 	// pieces of code that you won't be using.
 	//
-	/*unsigned int debug_mode = 1;
+	unsigned int debug_mode = 1;
 
 	switch (debug_mode)
 	{
@@ -341,5 +347,5 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	// End of exampled code
 	//**********************************************************************
 	
-	return L;*/
+	return L;
 }
