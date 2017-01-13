@@ -204,27 +204,30 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Vector3 direccionCam = it.get_position() - world->get_ambient();
 	direccionCam = direccionCam.normalize();
 	if(it.intersected()->material()->is_delta()){
-		int rebote = 0;
-		while (it.did_hit() && rebote < 50 && it.intersected()->material()->is_delta()) {
+		int rebotes = 0;
+		while (it.did_hit() && rebotes < 50 && it.intersected()->material()->is_delta()) {
 			Ray r; Real x;
 			it.intersected()->material()->get_outgoing_sample_ray(it, r, x);
+			/*if (it.intersected()->material()->get_specular(it) > 0) {
+				r = Ray(r.get_origin() + it.get_normal()*0.001, r.get_direction());
+				world->first_intersection(r, it);
+			}*/
 			world->first_intersection(r, it);
-			direccionCam = r.get_origin();
+			direccionCam = r.get_direction();
 			direccionCam = direccionCam.normalize();
-			rebote++;
+			rebotes++;
 		}
 		if (!it.did_hit()) {
 			return world->get_background();
 		}
 	}
-	Vector3 position = it.get_position();
 	Vector3 Kd = it.intersected()->material()->get_albedo(it);
 	float specular = (it.intersected()->material()->get_specular(it));
 	std::vector<Real> p = {it.get_position().getComponent(0),it.get_position().getComponent(1),
 		it.get_position().getComponent(2)};
 	Real dist = 0;
 	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
-	m_global_map.find(p, 500, nodes, dist);
+	m_global_map.find(p, 200, nodes, dist);
 	// Luz del mapa
 	Vector3 indirecta = Vector3(0,0,0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
@@ -239,14 +242,16 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		float prod = direccionCam.dot_abs(Wr);
 		//Resto de calclos no se pueden sin alpha. 
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-		indirecta += brdf*flujo;	// Sumamos BRDF.
+		indirecta = indirecta + brdf*flujo;	// Sumamos BRDF.
 	}
 	// Aplicamos el filtro de cono.
 	Real denominador = 3.14159265 * pow(dist, 2);
 	indirecta = indirecta / denominador;
 
-
-	m_caustics_map.find(p, 500, nodes, dist);
+	p = { it.get_position().getComponent(0),it.get_position().getComponent(1),
+		it.get_position().getComponent(2) };
+	nodes = std::vector<const KDTree<Photon, 3U>::Node*>();
+	m_caustics_map.find(p, 200, nodes, dist);
 	// Luz del mapa
 	Vector3 causticas = Vector3(0, 0, 0);
 	for (int i = 0; i < static_cast<int>(nodes.size()); i++) {
@@ -261,12 +266,11 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		float prod = direccionCam.dot_abs(Wr);
 		//Resto de calclos no se pueden sin alpha. 
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-		causticas += brdf*flujo;	// Sumamos BRDF.
+		causticas = causticas + brdf*flujo;	// Sumamos BRDF.
 	}
 	// Aplicamos el filtro de cono.
 	denominador = 3.14159265 * pow(dist, 2);
 	causticas = causticas / denominador;
-	indirecta = indirecta + causticas;
 	//Luz Directa 
 	Vector3 directa = Vector3(0, 0, 0);
 	std::vector<LightSource*> lights = world->light_source_list;
@@ -281,15 +285,11 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 			//Resto de calclos no se pueden sin alpha. 
 			Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
 			//BRDF
-			float cos = dirSombra.dot(it.get_normal());
-			if (cos < 0) {
-				cos = 0;
-			}
-			directa = directa + light->get_incoming_light(it.get_position())*brdf*cos;
+			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
 		}
 	}
 	// Sumar aportación de ambas.
-	return directa + indirecta;
+	return directa+indirecta+causticas;
 
 	
 	//**********************************************************************
@@ -299,7 +299,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	// will need when doing the work. Goes without saying: remove the 
 	// pieces of code that you won't be using.
 	//
-	unsigned int debug_mode = 1;
+	/*unsigned int debug_mode = 1;
 
 	switch (debug_mode)
 	{
@@ -341,5 +341,5 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	// End of exampled code
 	//**********************************************************************
 	
-	return L;
+	return L;*/
 }
