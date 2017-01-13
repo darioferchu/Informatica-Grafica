@@ -223,6 +223,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	}
 	Vector3 Kd = it.intersected()->material()->get_albedo(it);
 	float specular = (it.intersected()->material()->get_specular(it));
+	float k = 1.0;
 	std::vector<Real> p = {it.get_position().getComponent(0),it.get_position().getComponent(1),
 		it.get_position().getComponent(2)};
 	Real dist = 0;
@@ -243,15 +244,15 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		//Resto de calclos no se pueden sin alpha. 
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
 		Real wp = 0.0;
-		Vector3 d = it.get_position() - foton->point().;
-		Real dk = d/(1*dist);
-		if (wp > dk) {
+		Vector3 d = it.get_position() - foton->data().position;
+		Real dk = 1-(sqrtf(pow(d.getComponent(0),2) + pow(d.getComponent(1),2) + pow(d.getComponent(2),2))/(k*dist));
+		if (wp < dk) {
 			wp = dk;
 		}
 		indirecta += brdf*flujo*wp;	// Aplicamos flujo y BRDF.
 	}
 	// Aplicamos el filtro de cono.
-	Real denominador = (1-(2/3*1))*3.14159265 * pow(dist, 2);
+	Real denominador = (1-(2/3*k))*3.14159265 * pow(dist, 2);
 	indirecta = indirecta / denominador;
 
 	p = { it.get_position().getComponent(0),it.get_position().getComponent(1),
@@ -272,10 +273,17 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		float prod = direccionCam.dot_abs(Wr);
 		//Resto de calclos no se pueden sin alpha. 
 		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
-		causticas = causticas + brdf*flujo;	// Sumamos BRDF.
+		Real wp = 0.0;
+		Vector3 d = it.get_position() - foton->data().position;
+		Real dk = 1 - (sqrtf(pow(d.getComponent(0), 2) + pow(d.getComponent(1), 2) + 
+			pow(d.getComponent(2), 2)) / (k*dist));
+		if (wp < dk) {
+			wp = dk;
+		}
+		causticas += brdf*flujo*wp;	// Aplicamos flujo y BRDF.
 	}
 	// Aplicamos el filtro de cono.
-	denominador = 3.14159265 * pow(dist, 2);
+	denominador = (1 - (2 / 3 * k))*3.14159265 * pow(dist, 2);
 	causticas = causticas / denominador;
 	//Luz Directa 
 	Vector3 directa = Vector3(0, 0, 0);
