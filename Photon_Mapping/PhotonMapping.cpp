@@ -149,40 +149,53 @@ void PhotonMapping::preprocess()
 		LightSource *light = lights.at(i);		// Se obtiene la luz actual.
 		Vector3 origin = light->get_position(); // Se obtiene posición de la luz actual.
 		Ray ray;		// Se declara el rayo.
-		do {
+						// Se calcula dirección aleatoria.
+		Real randomX = distribution(random);
+		Real randomY = distribution(random);
+		Real randomZ = distribution(random);
+		while (pow(randomX, 2) + pow(randomY, 2) + pow(randomZ, 2) > 1) {
+			randomX = distribution(random);
+			randomY = distribution(random);
+			randomZ = distribution(random);
+		}
+		Vector3 direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
+		direction = direction.normalize();		// Se normaliza.
+		ray = Ray(origin, direction);		// Se crea y lanza el rayo.
+		while (trace_ray(ray, light->get_intensities() / m_max_nb_shots, global_photons, caustic_photons, false)) {
+			// Se guardan los fotones en el KD-Tree.
+			list<Photon>::iterator fotones = global_photons.begin();		// Se crea el iterador.
+			for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {		// Se recorren los fotones.
+				Photon foton = *fotones;		// Se obtiene el fotón actual.
+				std::vector<Real> position = { foton.position.getComponent(0),
+					foton.position.getComponent(1),foton.position.getComponent(2) };	// Vector para la posición.
+				m_global_map.store(position, foton);	// Se almacena el fotón.
+				*fotones++;		// Se pasa al siguiente fotón.
+			}
+			fotones = caustic_photons.begin();		// Se crea el iterador.
+			for (int i = 0; i < static_cast<int>(caustic_photons.size()); i++) {		// Se recorren los fotones.
+				Photon foton = *fotones;		// Se obtiene el fotón actual.
+				std::vector<Real> position = { foton.position.getComponent(0),
+					foton.position.getComponent(1),foton.position.getComponent(2) };	// Vector para la posición.
+				m_caustics_map.store(position, foton);		// Se almacena el fotón.	
+				*fotones++;		// Se pasa al siguiente fotón.
+			}
+			global_photons.clear();
+			caustic_photons.clear();
 			// Se calcula dirección aleatoria.
-			Real randomX = distribution(random);
-			Real randomY = distribution(random);
-			Real randomZ = distribution(random);
+			randomX = distribution(random);
+			randomY = distribution(random);
+			randomZ = distribution(random);
 			while (pow(randomX, 2) + pow(randomY, 2) + pow(randomZ, 2) > 1) {
 				randomX = distribution(random);
 				randomY = distribution(random);
 				randomZ = distribution(random);
 			}
-			Vector3 direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
+			direction = Vector3(randomX, randomY, randomZ);	// Se crea el vector con la dirección.
 			direction = direction.normalize();		// Se normaliza.
 			ray = Ray(origin, direction);		// Se crea y lanza el rayo.
-		} while (trace_ray(ray, light->get_intensities()/m_max_nb_shots, global_photons, caustic_photons, false));
-	}
-
-	// Se guardan los fotones en el KD-Tree.
-	list<Photon>::iterator fotones = global_photons.begin();		// Se crea el iterador.
-	for (int i = 0; i < static_cast<int>(global_photons.size()); i++) {		// Se recorren los fotones.
-		Photon foton = *fotones;		// Se obtiene el fotón actual.
-		std::vector<Real> position = { foton.position.data[0],
-			foton.position.data[1],foton.position.data[2] };	// Vector para la posición.
-		m_global_map.store(position, foton);	// Se almacena el fotón.
-		*fotones++;		// Se pasa al siguiente fotón.
+		} 
 	}
 	m_global_map.balance();
-	fotones = caustic_photons.begin();		// Se crea el iterador.
-	for (int i = 0; i < static_cast<int>(caustic_photons.size()); i++) {		// Se recorren los fotones.
-		Photon foton = *fotones;		// Se obtiene el fotón actual.
-		std::vector<Real> position = { foton.position.data[0],
-			foton.position.data[1],foton.position.data[2] };	// Vector para la posición.
-		m_caustics_map.store(position, foton);		// Se almacena el fotón.	
-		*fotones++;		// Se pasa al siguiente fotón.
-	}
 	m_caustics_map.balance();
 }
 
@@ -246,7 +259,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 
 	// Se crea el vector para los fotones más cercanos.
 	std::vector<const KDTree<Photon, 3U>::Node*> nodes;
-	m_global_map.find(p, 10, nodes, radio);		// Se buscan los fotones.
+	m_global_map.find(p, 50, nodes, radio);		// Se buscan los fotones.
 
 	// Luz del mapa global.
 	Vector3 indirecta = Vector3(0,0,0);		// Vector de la luz indirecta.
@@ -274,7 +287,8 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 	Real denominador = (1-(2/3*k))*3.14159265 * pow(radio, 2);
 	indirecta = indirecta / denominador;
 
-	m_caustics_map.find(p, 10, nodes, radio);	// Se buscan los fotones.
+	nodes.clear();
+	m_caustics_map.find(p, 50, nodes, radio);	// Se buscan los fotones.
 	
 	// Luz del mapa de cáusticas.
 	Vector3 causticas = Vector3(0, 0, 0);	// Vector de luz de caústicas.
