@@ -99,9 +99,9 @@ int main(int argc, char* argv[])
 	BSDF* white = new Lambertian(w, Vector3(.85,.85,.85));
 	BSDF* red = new Lambertian(w, Vector3(.85,.085,.085));
 	BSDF* green = new Lambertian(w, Vector3(.085,.85,.085));
-	BSDF* greenP = new Phong(w, Vector3(.085, .85, .085),0.3);
-	BSDF* blueP = new Phong(w, Vector3(.085, .085, .85), 1);
-	BSDF* redP = new Phong(w, Vector3(.85, .085, .085), 0.7);
+	BSDF* greenP = new Phong(w, Vector3(.085, .85, .085),0.1);
+	BSDF* blueP = new Phong(w, Vector3(.085, .085, .85), 1.5);
+	BSDF* redP = new Phong(w, Vector3(.85, .085, .085), 3);
 
 
 	Triangle* floor1 = new Triangle( Vector3(-1.5,0,1.5),Vector3(1.5,0.,1.5),
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 		Vector3(1,-.5,1.5), green);
 	w->add_object(right2); 
 
-	scene = 6;
+	scene = 1;
 	switch(scene)
 	{
 	case 1:
@@ -203,14 +203,23 @@ int main(int argc, char* argv[])
 	break;
 	case 6:
 	{
-		Object3D* sphere1 = new Sphere(Vector3(-0.5, 0.3, 0.2), 0.3, redP);
+		Object3D* sphere1 = new Sphere(Vector3(-0.5, 0.3, 0.2), 0.2, redP);
 		w->add_object(sphere1);
 
-		Object3D* sphere2 = new Sphere(Vector3(0.5, 0.3, 0.2), 0.3, blueP);
+		Object3D* sphere2 = new Sphere(Vector3(0.5, 0.3, 0.2), 0.2, blueP);
 		w->add_object(sphere2);
 
-		Object3D* sphere3 = new Sphere(Vector3(0, 0.3, 0.2), 0.3, greenP);
+		Object3D* sphere3 = new Sphere(Vector3(0, 0.3, 0.2), 0.2, greenP);
 		w->add_object(sphere3);
+	}
+	break;
+	case 7:
+	{
+		Object3D* sphere1 = new Sphere(Vector3(0, 0.5, 0), 0.5, glass);
+		w->add_object(sphere1);
+
+		Object3D* sphere2 = new Sphere(Vector3(0, 0.5, 0), 0.2, red);
+		w->add_object(sphere2);
 	}
 	break;
 	default:
@@ -222,7 +231,7 @@ int main(int argc, char* argv[])
 		w->add_object(sphere2);
 	}
 	}
-	LightSource* ls = new PointLightSource(w, Vector3(0,1.9,1), Vector3(5,5,5));
+	LightSource* ls = new PointLightSource(w, Vector3(0,1.9,-0.1), Vector3(5,5,5));
 	w->add_light(ls);
 
 	w->fix();

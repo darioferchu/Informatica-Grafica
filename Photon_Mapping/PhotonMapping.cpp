@@ -144,6 +144,7 @@ void PhotonMapping::preprocess()
 	std::list<Photon> caustic_photons;
 	// Se obtiene una lista de las luces
 	std::vector<LightSource*> lights = world->light_source_list;
+	bool caust = false;
 
 	for (int i = 0; i < static_cast<int>(lights.size()); i++) {		// Se recorren las luces.
 		LightSource *light = lights.at(i);		// Se obtiene la luz actual.
@@ -176,8 +177,9 @@ void PhotonMapping::preprocess()
 				Photon foton = *fotones;		// Se obtiene el fotón actual.
 				std::vector<Real> position = { foton.position.getComponent(0),
 					foton.position.getComponent(1),foton.position.getComponent(2) };	// Vector para la posición.
-				m_caustics_map.store(position, foton);		// Se almacena el fotón.	
+				m_caustics_map.store(position, foton);		// Se almacena el fotón.
 				*fotones++;		// Se pasa al siguiente fotón.
+				caust = true;
 			}
 			global_photons.clear();
 			caustic_photons.clear();
@@ -196,7 +198,9 @@ void PhotonMapping::preprocess()
 		} 
 	}
 	m_global_map.balance();
-	m_caustics_map.balance();
+	if (caust) {
+		m_caustics_map.balance();
+	}
 }
 
 //*********************************************************************
@@ -273,7 +277,7 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		// Producto escalar del reflejado con la cámara.
 		Real prod = direccionCam.dot_abs(Wr);
 		// Valor final de la BRDF.
-		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
+		Vector3 brdf = Kd / 3.14159 + specular*((100 + 2) / (2 * 3.14159))*pow(prod, 100);
 		Real wp = 0.0;		// Parámetros para el filtro de cono.
 		Vector3 d = it.get_position() - foton->data().position;
 		Real dk = 1-(sqrtf(pow(d.getComponent(0),2) + pow(d.getComponent(1),2) +
@@ -296,13 +300,14 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		// Se obtiene el fotón.
 		const KDTree<Photon, 3>::Node *foton = nodes.at(i);
 		Vector3 flujo = foton->data().flux;		// Se saca el flujo.
+
 		// Se calcula el valor de la BRDF.
 		Vector3 Wr = Vector3(0, 0, 0);		// Dirección del rayo reflejado.
 		Wr = Wr.reflect(it.get_normal());
 		// Producto escalar del reflejado con la cámara.
 		Real prod = direccionCam.dot_abs(Wr);
 		// Valor final de la BRDF. 
-		Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
+		Vector3 brdf = Kd / 3.14159 + specular*((100 + 2) / (2 * 3.14159))*pow(prod, 100);
 		Real wp = 0.0;	// Parámetros para el filtro de cono.
 		Vector3 d = it.get_position() - foton->data().position;
 		Real dk = 1 - (sqrtf(pow(d.getComponent(0), 2) + pow(d.getComponent(1), 2) + 
@@ -325,14 +330,16 @@ Vector3 PhotonMapping::shade(Intersection &it0)const
 		if(light->is_visible(it.get_position())) {	// Se comprueba si es visible.
 			// Se obtiene la dirección de sombra.
 			Vector3 dirSombra = light->get_incoming_direction(it.get_position());
-			Vector3 Wr = dirSombra - (dirSombra - it.get_normal() *
-				(dirSombra.dot(it.get_normal()))) * 2;
+			dirSombra = dirSombra.normalize();
+			Vector3 Wr = Vector3(0, 0, 0);		// Dirección del rayo reflejado.
+			Wr = it.get_normal().reflect(dirSombra);
 			// Producto escalar entre la cámara y la sombra.
-			Real prod = direccionCam.dot_abs(Wr);
+			Real prod = dirSombra.dot_abs(Wr);
 			// Calculo final de la BRDF.
-			Vector3 brdf = Kd / 3.14159 + specular*((10 + 2) / (2 * 3.14159))*pow(prod, 10);
+			Vector3 brdf = Kd / 3.14159 + specular*((100 + 2) / (2 * 3.14159))*pow(prod, 100);
 			// Se acumula para cada fuente de luz.
-			directa = directa + light->get_incoming_light(it.get_position())*brdf*dirSombra.dot_abs(it.get_normal());
+			Real cos = dirSombra.dot_abs(it.get_normal());
+			directa = directa + light->get_incoming_light(it.get_position())*brdf*cos;
 		}
 	}
 	//indirecta = (0, 0, 0);
